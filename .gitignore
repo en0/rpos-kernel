@@ -1,6 +1,7 @@
 include/kconfig.h
 rpos-kernel
 
+.gdb_history
 *-ignore
 *-ignore.*
 
