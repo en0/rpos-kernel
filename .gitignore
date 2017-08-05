@@ -1,3 +1,6 @@
+include/kconfig.h
+rpos-kernel
+
 *-ignore
 *-ignore.*
 
