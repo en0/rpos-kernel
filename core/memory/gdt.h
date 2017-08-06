@@ -18,16 +18,20 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdint.h>
-#include <stddef.h>
+#ifndef _MEMORY_GDT_H
+#define _MEMORY_GDT_H 1
 
-#ifndef _MEMORY_INIT_H
-#define _MEMORY_INIT_H 1
+/* 
+ * gdt_install()
+ * Setup and install the Global descripter table.
+ *
+ * Arguments: 
+ * - None
+ *
+ * Returns:
+ * - None
+ */
 
 void gdt_install(void);
-void pmem_free_region(void* addr, size_t size);
-void pmem_lock_region(void* addr, size_t size);
-void* pmem_allocate_frame();
-void pmem_free_frame(void* addr, uint32_t size);
 
-#endif /* _MEMORY_INIT_H */
+#endif

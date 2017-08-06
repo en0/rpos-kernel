@@ -54,5 +54,6 @@ extern void* _ekernel;
 /* Size information */
 #define KERNEL_SIZE         ((size_t)(PHYS_ADDR_KEND - PHYS_ADDR_KSTART))
 #define KERNEL_HEAP         ((heap_info_t *)VIRT_ADDR_HEAP)
+#define STACK_SIZE          ((uint32_t)(VIRT_ADDR_STACK - VIRT_ADDR_ESTACK))
 
 #endif /* _KCONFIG_H */

@@ -18,14 +18,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <string.h>
 #include <stdbool.h>
 
 #include <kconfig.h>
 #include <klib/dbglog.h>
 #include <core/utils.h>
 
-#include "memory/init.h"
 #include "boot/multiboot.h"
+
+#include "memory/gdt.h"
+#include "memory/pmem.h"
+#include "memory/vmem.h"
 
 extern int main(int,char**);
 
@@ -84,11 +88,25 @@ bool sysinit_initialize_memory_manager(multiboot_info_t* mbi) {
     pmem_lock_region((void*)mbi->mods_addr, sizeof(uint32_t));
     pmem_lock_region((void*)ramdisk_info->mod_start, ramdisk_info->mod_end - ramdisk_info->mod_start);
 
-    //Virtual memory next.
+    // Build a struct with the map of all the memory we need into paging.
+    vmem_map_info_t initial_regions[] = {
+        { PHYS_ADDR_KSTART, VIRT_ADDR_KSTART, KERNEL_SIZE, VMEM_FLG_WRITABLE },
+        { PHYS_ADDR_VGA3, VIRT_ADDR_VGA3, 4096, VMEM_FLG_WRITABLE },
+        { NULL, VIRT_ADDR_ESTACK,  STACK_SIZE, VMEM_FLG_WRITABLE },
+        { (void*)ramdisk_info->mod_start, VIRT_ADDR_RAMDISK,
+          ramdisk_info->mod_end - ramdisk_info->mod_start,
+          0x00 /* Read only */ },
+    };
+
+    vmem_initialize_paging(initial_regions, 4);
+
     return true;
 }
 
 void sysinit(multiboot_info_t* mbi) {
+
+    char cmdline[256];
+    memcpy(cmdline, (void*)mbi->cmdline, 256);
 
     dbglog_init();
 
@@ -98,7 +116,9 @@ void sysinit(multiboot_info_t* mbi) {
     else if(!sysinit_initialize_memory_manager(mbi))
         abort("Failed to boot while initializing memory manager.");
 
-    dbglogf("mbi: %s \n", mbi->cmdline);
+    dbglogf("mbi: %s \n", cmdline);
+
+    //*((uint32_t*)p) = 1;
 
     // Setup memory management
     // Copy the current stack frame

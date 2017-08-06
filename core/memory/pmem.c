@@ -19,14 +19,10 @@
  **/
 
 #include <klib/bitmap.h>
+#include <core/utils.h>
 
-#define LOW_LIMIT 0x100
-#define PAGE_BIT_FRAME 12
+#define LOW_LIMIT 0x100000
 #define BITMAP_ARR_LEN (COMPUTE_BITMAP_WORD_CNT(0x100000))
-
-#define addr_to_frame(addr) (((uint32_t)addr)>>PAGE_BIT_FRAME)
-#define frame_to_addr(page) ((void*)(page<<PAGE_BIT_FRAME))
-
 
 bitmap_word_t g_pmem_map_data[BITMAP_ARR_LEN];
 bitmap_info_t g_pmem_map = { BITMAP_ARR_LEN, g_pmem_map_data };
@@ -53,7 +49,7 @@ void* pmem_allocate_frame() {
 
     uint32_t frame;
 
-    if(bitmap_find_first_absent(&g_pmem_map, LOW_LIMIT, &frame)) {
+    if(bitmap_find_first_absent(&g_pmem_map, addr_to_frame(LOW_LIMIT), &frame)) {
         bitmap_add(&g_pmem_map, frame);
         return (void*)frame_to_addr(frame);
     }
