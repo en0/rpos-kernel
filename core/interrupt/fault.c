@@ -24,66 +24,32 @@
  **/
 
 #include <string.h>
-#include <klib/cpu.h>
+#include <core/cpu.h>
+#include <klib/dbglog.h>
 #include "idt.h"
+#include "fault.h"
+
+void(*g_fault_vector[34])(regs_t*);
 
 const char *exception_messages[] = {
-    "Division By Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoin",
-    "Overflow",
-    "Bound Range Exceeded",
-    "Invalid Opcode",
-    "Device Not Available",
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Invalid TSS",
-    "Segment Not Present.",
-    "Stack-Segment Fault",
-    "General Protection Fault",
-    "Page Fault",
-    "Reserved",
-    "x87 Floating-Point Exception",
-    "Alignment Check",
-    "Machine Check",
-    "SIMD Floating-Point Exception",
-    "Virtualization Exception",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Reserved",
-    "Security Exception",
-    "Reserved",
-    "Triple Fault",
-    "FPU Error Interrupt"
+    "Division By Zero",             "Debug",
+    "Non Maskable Interrupt",       "Breakpoin",
+    "Overflow",                     "Bound Range Exceeded",
+    "Invalid Opcode",               "Device Not Available",
+    "Double Fault",                 "Coprocessor Segment Overrun",
+    "Invalid TSS",                  "Segment Not Present.",
+    "Stack-Segment Fault",          "General Protection Fault",
+    "Page Fault",                   "Reserved",
+    "x87 Floating-Point Exception", "Alignment Check",
+    "Machine Check",                "SIMD Floating-Point Exception",
+    "Virtualization Exception",     "Reserved",
+    "Reserved",                     "Reserved",
+    "Reserved",                     "Reserved",
+    "Reserved",                     "Reserved",
+    "Reserved",                     "Reserved",
+    "Security Exception",           "Reserved",
+    "Triple Fault",                 "FPU Error Interrupt"
 };
-
-extern void fault_stub0(void);
-extern void fault_stub1(void);
-extern void fault_stub2(void);
-extern void fault_stub3(void);
-extern void fault_stub4(void);
-extern void fault_stub5(void);
-extern void fault_stub6(void);
-extern void fault_stub7(void);
-extern void fault_stub8(void);
-extern void fault_stub10(void);
-extern void fault_stub11(void);
-extern void fault_stub12(void);
-extern void fault_stub13(void);
-extern void fault_stub14(void);
-extern void fault_stub16(void);
-extern void fault_stub17(void);
-extern void fault_stub18(void);
-extern void fault_stub19(void);
-extern void fault_stub20(void);
-extern void fault_stub30(void);
 
 void fault_initialize_api() {
     idt_setGate(0x00, &fault_stub0, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
@@ -113,27 +79,29 @@ void fault_initialize_api() {
 
 void fault_handler(regs_t *r) {
 
-#ifdef PROFILE_DEBUG
-    dbglogf("\n\n!!! FAULT %i(%i) - %s !!!\n\n", r->int_no, r->err_code, exception_messages[r->int_no]);
-    dbglogf("--- CORE DUMP -----------------------------------------------------\n");
-    dbglogf("eax: %p, ebx: %p, ecx: %p, edx: %p\n", r->eax, r->ebx, r->ecx, r->edx);
-    dbglogf("esp: %p, ebp: %p, esi: %p, edi: %p\n", r->esp, r->ebp, r->esi, r->edi);
-    dbglogf("cs: %p, ss: %p, ds: %p, es: %p\n", r->cs, r->ss, r->ds, r->es);
-    dbglogf("fs: %p, gs: %p, eip: %p, eflags: %b\n", r->fs, r->gs, r->eip, r->eflags);
-#endif
+    if(g_fault_vector[r->int_no] != NULL)
+        g_fault_vector[r->int_no](r);
+    else  {
+        dbglogf("\n\n!!! FAULT %i(%i) - %s !!!\n\n", r->int_no, r->err_code, exception_messages[r->int_no]);
+        dbglogf("--- CORE DUMP -----------------------------------------------------\n");
+        dbglogf("eax: %p, ebx: %p, ecx: %p, edx: %p\n", r->eax, r->ebx, r->ecx, r->edx);
+        dbglogf("esp: %p, ebp: %p, esi: %p, edi: %p\n", r->esp, r->ebp, r->esi, r->edi);
+        dbglogf("cs: %p, ss: %p, ds: %p, es: %p\n", r->cs, r->ss, r->ds, r->es);
+        dbglogf("fs: %p, gs: %p, eip: %p, eflags: %b\n", r->fs, r->gs, r->eip, r->eflags);
 
-    //kclear();
-    //kprintf("\n\n!!! FAULT %i(%i) - %s !!!\n\n", r->int_no, r->err_code, exception_messages[r->int_no]);
-    //kprintf("--- CORE DUMP -----------------------------------------------------\n");
-    //kprintf("eax: %p, ebx: %p, ecx: %p, edx: %p\n", r->eax, r->ebx, r->ecx, r->edx);
-    //kprintf("esp: %p, ebp: %p, esi: %p, edi: %p\n", r->esp, r->ebp, r->esi, r->edi);
-    //kprintf("cs: %p, ss: %p, ds: %p, es: %p\n", r->cs, r->ss, r->ds, r->es);
-    //kprintf("fs: %p, gs: %p, eip: %p, eflags: %b\n", r->fs, r->gs, r->eip, r->eflags);
+        //kclear();
+        //kprintf("\n\n!!! FAULT %i(%i) - %s !!!\n\n", r->int_no, r->err_code, exception_messages[r->int_no]);
+        //kprintf("--- CORE DUMP -----------------------------------------------------\n");
+        //kprintf("eax: %p, ebx: %p, ecx: %p, edx: %p\n", r->eax, r->ebx, r->ecx, r->edx);
+        //kprintf("esp: %p, ebp: %p, esi: %p, edi: %p\n", r->esp, r->ebp, r->esi, r->edi);
+        //kprintf("cs: %p, ss: %p, ds: %p, es: %p\n", r->cs, r->ss, r->ds, r->es);
+        //kprintf("fs: %p, gs: %p, eip: %p, eflags: %b\n", r->fs, r->gs, r->eip, r->eflags);
 
-    // The stubs do an iRet because i am sure i will have
-    // some fault hanlders return back. I might even do a vector map
-    // so that things like the PMEM code can assert there own fault_handler
-    // for specific interrupts.
+        // Not recoverable.
+        halt();
+    }
+}
 
-    halt();
+void install_fault_handler(int fault_number, void(*fn)(regs_t*)) {
+    g_fault_vector[fault_number] = fn;
 }

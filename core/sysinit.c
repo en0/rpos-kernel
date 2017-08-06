@@ -125,10 +125,13 @@ bool sysinit_initialize_peripherals(multiboot_info_t* mbi) {
 void sysinit(multiboot_info_t* mbi) {
 
     char cmdline[256];
+    uint32_t esp, ebp, stack_frame_size;
+
     memcpy(cmdline, (void*)mbi->cmdline, 256);
 
     dbglog_init();
 
+    /** Start core services. **/
     if(!sysinit_is_mutliboot_data_present(mbi))
         abort("Failed to boot while validating multiboot information.");
 
@@ -141,26 +144,33 @@ void sysinit(multiboot_info_t* mbi) {
     else if(!sysinit_initialize_peripherals(mbi))
         abort("Failed to boot while initializing peripherals.");
 
-    dbglogf("mbi: %s \n", cmdline);
+    /** Move the stack to the new 8MB stack location **/
+    asm volatile ( 
+        "mov %%esp, %0;" 
+        "mov %%ebp, %1;" 
+        : "=r"(esp), "=r"(ebp));
 
-    //*((uint32_t*)p) = 1;
+    stack_frame_size = ebp - esp;
+    memcpy((void*)VIRT_ADDR_STACK-stack_frame_size, (void*)esp, stack_frame_size);
 
-    // Setup memory management
-    // Copy the current stack frame
+    asm volatile (
+        "mov %0, %%esp;"
+        "mov %1, %%ebp;"
+       : : "r"(VIRT_ADDR_STACK-stack_frame_size), "r"(VIRT_ADDR_STACK));
 
-    // Move the stack to the virtual memory space.
-    //asm volatile ( "mov %0, %%esp;" : : "a"(0xFFBFFFFF)); 
-
-    // Setup ISR
-    // Setup basic Perif
-    // get the boot command line
+    /** Parse the command line to pass to main. **/
+    int arg_cnt;
+    char *arg_values[255];
+    for(arg_cnt = 0, arg_values[arg_cnt] = strtok(cmdline, " "); 
+        arg_cnt < 255 && arg_values[arg_cnt] != NULL;
+        arg_cnt++, arg_values[arg_cnt] = strtok(NULL, " "));
 
     sti();
-    main(1, (char**)&"Hello, World");
+    main(arg_cnt, arg_values);
 
     for(;;);
 
-    // The stack is dead: Cannot return.
+    // !! The stack is dead: Cannot return. !!
     halt();
 }
 

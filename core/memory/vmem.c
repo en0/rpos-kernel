@@ -27,8 +27,10 @@
 
 #include <string.h>
 #include <kconfig.h>
-#include <klib/bitmap.h>
 #include <core/utils.h>
+#include <klib/bitmap.h>
+
+#include "../interrupt/fault.h"
 #include "pmem.h"
 #include "vmem.h"
 
@@ -43,6 +45,7 @@ uint32_t* g_vmem_page_tbl = VIRT_ADDR_PGPTE;
 /* PROTO */
 void _lock_region(void* addr, size_t size);
 void _initialize_map_region(vmem_map_info_t* region);
+void _page_fault_handler(regs_t* reg);
 
 
 void printPDE(uint32_t *v) {
@@ -118,7 +121,7 @@ void vmem_initialize_paging(vmem_map_info_t* regions, size_t map_cnt) {
     for(i = 0; i < map_cnt; i++)
         _initialize_map_region(&regions[i]);
 
-    printPDE(VIRT_ADDR_PGPDE);
+    install_fault_handler(FAULT_PF, _page_fault_handler);
 
     asm volatile("mov %0, %%cr3;" : : "r"(g_vmem_page_dir));
     g_vmem_page_dir = VIRT_ADDR_PGPDE;
@@ -193,6 +196,11 @@ void vmem_free_page(void* addr, size_t size) {
 
     for(;first_frame <= last_frame; first_frame++)
         bitmap_rem(&g_vmem_map, first_frame);
+}
+
+void _page_fault_handler(regs_t* reg) {
+    dbglogf("PAGE FAULT!");
+    halt();
 }
 
 // TODO: Add page fault handler to map in a new page.

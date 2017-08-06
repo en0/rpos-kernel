@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <core/cpu.h>
 #include <klib/dbglog.h>
-#include <klib/cpu.h>
 
 #ifndef _UTILS_H
 #define _UTILS_H 1

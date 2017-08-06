@@ -19,10 +19,10 @@
  **/
 
 #include <stdint.h>
-#include <klib/io.h>
+#include <core/io.h>
 
-#ifndef _KLIB_CPU_H
-#define _KLIB_CPU_H
+#ifndef _CORE_CPU_H
+#define _CORE_CPU_H
 
 typedef struct regs {
     uint32_t gs, fs, es, ds;

@@ -19,13 +19,24 @@
  **/
 
 #include <string.h>
+#include <stdint.h>
 #include <stdarg.h>
-#include <klib/io.h>
 #include <klib/dbglog.h>
 
 #ifdef PROFILE_DEBUG
 
 #define COM1 0x3f8
+
+
+static inline void outb(uint8_t val, uint16_t port) {
+    asm volatile ( "out %0, %1;" : : "a"(val), "Nd"(port));
+}
+
+static inline uint8_t inb(uint16_t port) {
+    uint8_t val;
+    asm volatile ( "in %1, %0" : "=a"(val) : "Nd"(port));
+    return val;
+}
 
 void dbglog_init() {
     outb(0x00, COM1+1);

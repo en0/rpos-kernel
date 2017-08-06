@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef __IO_H
-#define __IO_H 1
+#ifndef _CORE_IO_H
+#define _CORE_IO_H 1
 
 #include <stdint.h>
 
@@ -44,4 +44,4 @@ static inline void io_wait(void)
                    "2:" );
 }
 
-#endif /* __IO_H */
+#endif
