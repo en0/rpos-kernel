@@ -34,6 +34,12 @@
 #include "pmem.h"
 #include "vmem.h"
 
+#define VMEM_PF_P_MASK    0b00001
+#define VMEM_PF_RW_MASK   0b00010
+#define VMEM_PF_US_MASK   0b00100
+#define VMEM_PF_RSVD_MASK 0b01000
+#define VMEM_ID_RSVD_MASK 0b10000
+
 #define BITMAP_ARR_LEN (COMPUTE_BITMAP_WORD_CNT(0x100000))
 
 bitmap_word_t g_vmem_map_data[BITMAP_ARR_LEN];
@@ -47,6 +53,25 @@ void _lock_region(void* addr, size_t size);
 void _initialize_map_region(vmem_map_info_t* region);
 void _page_fault_handler(regs_t* reg);
 
+#define is_pf_access_violation(e) is_flag_set(e, VMEM_PF_P_MASK)
+#define is_pf_user_mode(e) is_flag_set(e, VMEM_PF_US_MASK)
+
+static inline uint32_t get_cr3() {
+    uint32_t addr;
+    asm volatile( "mov %%cr2, %0" : "=r"(addr));
+    return addr;
+}
+
+static inline void _invalidate_page_table_entry(uint32_t* addr)
+{
+   asm volatile("invlpg (%0)" ::"r" (addr) : "memory");
+}
+
+static inline void _invalidate_page_table() {
+    asm volatile(
+        "mov %cr3, %eax;"
+        "mov %eax, %cr3;" );
+}
 
 void printPDE(uint32_t *v) {
     
@@ -198,14 +223,33 @@ void vmem_free_page(void* addr, size_t size) {
         bitmap_rem(&g_vmem_map, first_frame);
 }
 
-void _page_fault_handler(regs_t* reg) {
-    dbglogf("PAGE FAULT!");
-    halt();
+void _map_single_frame(void* v, void* p, uint32_t flags) {
+
+    uint32_t tbl_index = addr_to_table_index(v);
+
+    if(p == NULL)
+        p = pmem_allocate_frame();
+
+    g_vmem_page_tbl[tbl_index] =
+        align4(p) | flags | VMEM_FLG_PRESENT;
+
+    _invalidate_page_table_entry(v);
 }
 
-// TODO: Add page fault handler to map in a new page.
-/* Looks something like this:
- * p = pmem_allocate_frame();
- * g_vmem_page_dir[tbl_index] = 
- *      ((uint32_t)p & 0xFFFFF000) | flags | VMEM_FLG_PRESENT; */
+void _page_fault_handler(regs_t* reg) {
+
+    uint32_t *addr = (void*)get_cr3();
+
+    dbglogf("!! PAGE FAULT !!\n");
+
+    if(is_pf_access_violation(reg->err_code)) {
+        dbglogf("Access Violation!\n");
+        halt();
+    } else {
+        dbglogf("Page is absent: %p!\n", addr);
+        _map_single_frame(addr, NULL, VMEM_FLG_WRITABLE);
+        dbglogf("Page has been mapped: Page is present.\n");
+    }
+
+}
 

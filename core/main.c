@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
     uint32_t* x = vmem_allocate_kernel_heap_page();
     *x = 123;
 
+    dbglogf("[%p] = %i\n", x, *x);
+
     return 0;
 }
 
