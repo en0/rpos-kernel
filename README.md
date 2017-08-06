@@ -11,13 +11,13 @@ focus.
 
 ## Features
 
-[X] Higher half loading
-[X] 4Kb physical frame allocation
-[X] 4Kb pageing
-[ ] 4Kb virtual frame allocation
-[X] RTC implemented using the 8259 PIC
-[X] COM1 Serial logging (Debug output)
-[ ] Virtual File System using CPIO initfs
-[ ] Basic newlib system request handling
-[ ] Application loaded by kernel after system is up.
-[ ] Ability to execute another program using the shell from the VirtFS
+- [X] Higher half loading
+- [X] 4Kb physical frame allocation
+- [X] 4Kb pageing
+- [X] 4Kb virtual frame allocation
+- [X] RTC implemented using the 8259 PIC
+- [X] COM1 Serial logging (Debug output)
+- [ ] Virtual File System using CPIO initfs
+- [ ] Basic newlib system request handling
+- [ ] Application loaded by kernel after system is up.
+- [ ] Ability to execute another program using the shell from the VirtFS
