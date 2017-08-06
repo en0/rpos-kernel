@@ -115,11 +115,8 @@ void vmem_initialize_paging(vmem_map_info_t* regions, size_t map_cnt) {
     // Lock the memory map range
     _lock_region(g_vmem_page_tbl, 0xFFFFFFFF - (uint32_t)g_vmem_page_tbl);
 
-    dbglogf("map_cnt = %i\n", map_cnt);
-    for(i = 0; i < map_cnt; i++) {
-        dbglogf("i = %i\n", i);
+    for(i = 0; i < map_cnt; i++)
         _initialize_map_region(&regions[i]);
-    }
 
     printPDE(VIRT_ADDR_PGPDE);
 

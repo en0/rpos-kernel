@@ -41,9 +41,53 @@ typedef struct vmem_map_info {
     uint16_t flags;
 } vmem_map_info_t;
 
+/*
+ * initialize_paging(regions, region_cnt)
+ * setup paging and map the given regions into the new page tables.
+ *
+ * NOTE: This function requires identity mapping for physical addresses. After
+ * this method returns, those identity mappings will no longer function and the
+ * new page table will be installed.
+ *
+ * Arguments:
+ * - regions: An array of vmem_map_info_t structures that reference what
+ *   regions of virtual memory to map to what physical blocks.
+ * - region_cnt: The number of structures in the array.
+ *
+ * Regions:
+ * - None
+ */
+
 void vmem_initialize_paging(vmem_map_info_t* regions, size_t map_cnt);
-void vmem_initialize_map_address(void *p, void *v, uint16_t flags);
+
+/*
+ * allocate_kernel_heap_page()
+ * Reserve a virtual address frame and return it's address.
+ *
+ * NOTE: This function does not map the address into the page table.
+ *
+ * Arguments:
+ * - None
+ *
+ * Regions:
+ * - A pointer to the virtual address that was reserved.
+ */
+
 void* vmem_allocate_kernel_heap_page();
+
+/*
+ * free_page(addr, size)
+ * Unlock a virtual address frame.
+ *
+ * NOTE: This function does not remove the frame from the page table.
+ *
+ * Arguments:
+ * - addr: The address of the first page to be freed. Must be 4k aligned.
+ * - size: The size, in bytes, of the region to be freed.
+ *
+ * Regions:
+ * - None
+ */
 void vmem_free_page(void* addr, size_t size);
 
 #endif
