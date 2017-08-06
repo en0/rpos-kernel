@@ -18,26 +18,9 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <klib/dbglog.h>
-#include <klib/cpu.h>
+#ifndef _INTERRUPT_FAULT_H
+#define _INTERRUPT_FAULT_H 1
 
-#ifndef _UTILS_H
-#define _UTILS_H 1
+void fault_initialize_api();
 
-#define align4(addr) ((uint32_t)addr & 0xFFFFF000)
-#define next_frame(addr) ((uint32_t)addr + 0x1000)
-
-#define addr_to_frame(addr) (((uint32_t)addr)>>12)
-#define frame_to_addr(page) ((void*)(page<<12))
-
-#define addr_to_directory_index(addr) (((uint32_t)addr)>>22)
-#define directory_index_to_addr(addr) (((uint32_t)addr)<<22)
-
-#define addr_to_table_index addr_to_frame
-#define table_index_to_addr frame_to_addr
-
-#define is_flag_set(a,b) ((a & b) == b)
-
-static inline void abort(const char* m) { dbglogf("ABORT: %s\n", m); cli(); hlt(); }
-
-#endif /* _UTILS_H */
+#endif /** __FAULT_H **/

@@ -18,26 +18,21 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <klib/dbglog.h>
-#include <klib/cpu.h>
+#include <stdint.h>
 
-#ifndef _UTILS_H
-#define _UTILS_H 1
+#ifndef _INTERRUPT_IDT_H
+#define _INTERRUPT_IDT_H
 
-#define align4(addr) ((uint32_t)addr & 0xFFFFF000)
-#define next_frame(addr) ((uint32_t)addr + 0x1000)
+#define IDT_FLG_PRESENT  0x8000
+#define IDT_FLG_DPL0     0x0000
+#define IDT_FLG_DPL1     0x2000
+#define IDT_FLG_DPL2     0x4000
+#define IDT_FLG_DPL3     0x6000
+#define IDT_FLG_TASKGATE 0x0500
+#define IDT_FLG_INTEGATE 0x0E00
+#define IDT_FLG_TRAPGATE 0x0F00
 
-#define addr_to_frame(addr) (((uint32_t)addr)>>12)
-#define frame_to_addr(page) ((void*)(page<<12))
+void idt_install();
+void idt_setGate(uint32_t, void(*)(), uint32_t);
 
-#define addr_to_directory_index(addr) (((uint32_t)addr)>>22)
-#define directory_index_to_addr(addr) (((uint32_t)addr)<<22)
-
-#define addr_to_table_index addr_to_frame
-#define table_index_to_addr frame_to_addr
-
-#define is_flag_set(a,b) ((a & b) == b)
-
-static inline void abort(const char* m) { dbglogf("ABORT: %s\n", m); cli(); hlt(); }
-
-#endif /* _UTILS_H */
+#endif

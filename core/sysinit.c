@@ -31,6 +31,12 @@
 #include "memory/pmem.h"
 #include "memory/vmem.h"
 
+#include "interrupt/idt.h"
+#include "interrupt/irq.h"
+#include "interrupt/fault.h"
+
+#include "peripheral/rtc.h"
+
 extern int main(int,char**);
 
 bool sysinit_is_mutliboot_data_present(multiboot_info_t* mbi) {
@@ -103,6 +109,19 @@ bool sysinit_initialize_memory_manager(multiboot_info_t* mbi) {
     return true;
 }
 
+bool sysinit_initialize_interrupt_api(multiboot_info_t* mbi) {
+
+    idt_install();
+    irq_initialize_api();
+    fault_initialize_api();
+    return true;
+}
+
+bool sysinit_initialize_peripherals(multiboot_info_t* mbi) {
+    rtc_install();
+    return true;
+}
+
 void sysinit(multiboot_info_t* mbi) {
 
     char cmdline[256];
@@ -113,8 +132,14 @@ void sysinit(multiboot_info_t* mbi) {
     if(!sysinit_is_mutliboot_data_present(mbi))
         abort("Failed to boot while validating multiboot information.");
 
+    else if(!sysinit_initialize_interrupt_api(mbi))
+        abort("Failed to boot while initializing interrupt api.");
+
     else if(!sysinit_initialize_memory_manager(mbi))
         abort("Failed to boot while initializing memory manager.");
+
+    else if(!sysinit_initialize_peripherals(mbi))
+        abort("Failed to boot while initializing peripherals.");
 
     dbglogf("mbi: %s \n", cmdline);
 
@@ -130,8 +155,10 @@ void sysinit(multiboot_info_t* mbi) {
     // Setup basic Perif
     // get the boot command line
 
-    //sti();
+    sti();
     main(1, (char**)&"Hello, World");
+
+    for(;;);
 
     // The stack is dead: Cannot return.
     halt();

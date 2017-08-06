@@ -18,26 +18,22 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <klib/dbglog.h>
-#include <klib/cpu.h>
+#include <stdint.h>
+#include <klib/io.h>
 
-#ifndef _UTILS_H
-#define _UTILS_H 1
+#ifndef _KLIB_CPU_H
+#define _KLIB_CPU_H
 
-#define align4(addr) ((uint32_t)addr & 0xFFFFF000)
-#define next_frame(addr) ((uint32_t)addr + 0x1000)
+typedef struct regs {
+    uint32_t gs, fs, es, ds;
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    uint32_t int_no, err_code;
+    uint32_t eip, cs, eflags, useresp, ss;
+} regs_t;
 
-#define addr_to_frame(addr) (((uint32_t)addr)>>12)
-#define frame_to_addr(page) ((void*)(page<<12))
+static inline void hlt() { for(;;) asm("hlt"); }
+static inline void sti() { asm("sti"); }
+static inline void cli() { asm("cli"); }
+static inline void halt() { cli(); hlt(); }
 
-#define addr_to_directory_index(addr) (((uint32_t)addr)>>22)
-#define directory_index_to_addr(addr) (((uint32_t)addr)<<22)
-
-#define addr_to_table_index addr_to_frame
-#define table_index_to_addr frame_to_addr
-
-#define is_flag_set(a,b) ((a & b) == b)
-
-static inline void abort(const char* m) { dbglogf("ABORT: %s\n", m); cli(); hlt(); }
-
-#endif /* _UTILS_H */
+#endif

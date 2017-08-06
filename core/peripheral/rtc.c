@@ -20,24 +20,40 @@
 
 #include <klib/dbglog.h>
 #include <klib/cpu.h>
+#include "../interrupt/irq.h"
 
-#ifndef _UTILS_H
-#define _UTILS_H 1
+uint32_t _seconds;
+uint16_t _ticks;
 
-#define align4(addr) ((uint32_t)addr & 0xFFFFF000)
-#define next_frame(addr) ((uint32_t)addr + 0x1000)
+void rtc_IRQHandler();
 
-#define addr_to_frame(addr) (((uint32_t)addr)>>12)
-#define frame_to_addr(page) ((void*)(page<<12))
+void rtc_install() {
 
-#define addr_to_directory_index(addr) (((uint32_t)addr)>>22)
-#define directory_index_to_addr(addr) (((uint32_t)addr)<<22)
+    /* 
+     * Configure the PIT
+     *   Channel 0, Rate Interval, L/MSB, 16bit Word
+     *   Count Register=0x04AA which is about 1 ms per tick.
+     */
 
-#define addr_to_table_index addr_to_frame
-#define table_index_to_addr frame_to_addr
+    outb(0x34, 0x43); // Control Word: 0b00110100 (CS=0,ACS=3,MODE=2,BCD=false)
+    outb(0xAA, 0x40); // Reload Value: 0x04AA ~= 1 ms
+    outb(0x04, 0x40);
 
-#define is_flag_set(a,b) ((a & b) == b)
+    // Initialize the tick tracking
+    _ticks = _seconds = 0;
 
-static inline void abort(const char* m) { dbglogf("ABORT: %s\n", m); cli(); hlt(); }
+    // Install IRQ Hander
+    install_irq_handler(0, &rtc_IRQHandler);
+}
 
-#endif /* _UTILS_H */
+uint32_t rtc_getTicks() {
+    return _seconds * 1000 + _ticks;
+}
+
+void rtc_IRQHandler(regs_t *r) { 
+    if(++_ticks == 1000) {
+        _ticks = 0;
+        _seconds++;
+        dbglogf("rtc_getTicks() = %i\n", rtc_getTicks());
+    }
+}

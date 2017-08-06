@@ -18,7 +18,12 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef _CORE_MEMORY_H
-#define _CORE_MEMORY_H 1
+#ifndef _PERIPHERAL_RTC_H
+#define _PERIPHERAL_RTC_H 1
 
-#endif /* _CORE_MEMORY_H */
+#include <stdint.h>
+
+void rtc_install();
+uint32_t rtc_getTicks();
+
+#endif
