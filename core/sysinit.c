@@ -33,6 +33,7 @@
 
 #include "interrupt/idt.h"
 #include "interrupt/irq.h"
+#include "interrupt/isr.h"
 #include "interrupt/fault.h"
 
 #include "peripheral/rtc.h"
@@ -113,6 +114,7 @@ bool sysinit_initialize_interrupt_api(multiboot_info_t* mbi) {
 
     idt_install();
     irq_initialize_api();
+    isr_initialize_api();
     fault_initialize_api();
     return true;
 }

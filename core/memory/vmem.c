@@ -62,9 +62,12 @@ static inline uint32_t get_cr3() {
     return addr;
 }
 
-static inline void _invalidate_page_table_entry(uint32_t* addr)
-{
-   asm volatile("invlpg (%0)" ::"r" (addr) : "memory");
+static inline void _invalidate_page_table_entry(uint32_t* addr) {
+   asm volatile(
+        "invlpg (%0)"
+        : 
+        :"r"(addr)
+        : "memory");
 }
 
 static inline void _invalidate_page_table() {

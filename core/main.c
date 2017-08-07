@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <core/cpu.h>
 #include <klib/dbglog.h>
@@ -17,6 +18,8 @@ int main(int argc, char** argv) {
     *x = 123;
 
     dbglogf("[%p] = %i\n", x, *x);
+
+    write(0, "Hello, world!\n", 14);
 
     return 0;
 }
