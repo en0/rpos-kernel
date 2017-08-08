@@ -1,10 +1,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <core/cpu.h>
+#include <core/task.h>
 #include <klib/dbglog.h>
 #include <klib/bitmap.h>
-
-#include "memory/vmem.h"
 
 int main(int argc, char** argv) {
 
@@ -12,15 +11,10 @@ int main(int argc, char** argv) {
      * Kernel main
      */
 
-    dbglogf("System started!\n");
+    task_initialize_kernel_task(argv[0], VIRT_ADDR_HEAP, VIRT_ADDR_EHEAP);
 
-    uint32_t* x = vmem_allocate_kernel_heap_page();
-    *x = 123;
-
-    dbglogf("[%p] = %i\n", x, *x);
-
-    //write(0, "Hello, world!\n", 14);
-    printf("MSG: %s", "Hello, World!");
+    dbglogf("System started: %s\n", task_active->name);
+    printf("MSG: %s\n", "Hello, World!");
 
     return 0;
 }

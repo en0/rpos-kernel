@@ -85,9 +85,25 @@ void* vmem_allocate_kernel_heap_page();
  * - addr: The address of the first page to be freed. Must be 4k aligned.
  * - size: The size, in bytes, of the region to be freed.
  *
- * Regions:
+ * Returns:
  * - None
  */
 void vmem_free_page(void* addr, size_t size);
+
+/*
+ * lock_region(addr, size)
+ * Lock a virtual address frame.
+ *
+ * NOTE: This function does not add the frame to the page table.
+ *
+ * Arguments:
+ * - addr: The address of the first page to be locked. It will be 4k aligned.
+ * - size: The size, in bytes, of the region to be locked
+ *
+ * Returns:
+ * - None
+ */
+
+void vmem_lock_region(void* addr, size_t size);
 
 #endif

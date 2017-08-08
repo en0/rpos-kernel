@@ -18,32 +18,22 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <core/cpu.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <core/task.h>
-#include <core/utils.h>
-#include <klib/dbglog.h>
-#include <errno.h>
 
-#include "../memory/vmem.h"
+task_t* g_task_active;
+task_t g_task_kernel_task;
 
-void* syscall_sbrk(int incr);
-
-void syscall_int80_sbrk(regs_t* regs) {
-    regs->eax = (uint32_t)syscall_sbrk(regs->ebx);
+void task_initialize_kernel_task(const char* name, void* heap, void* heap_limit) {
+    g_task_kernel_task.name = name;
+    g_task_kernel_task.brk = (uint32_t)heap;
+    g_task_kernel_task.brk_limit = (uint32_t)heap_limit;
+    g_task_kernel_task.is_supervisor = true;
+    g_task_kernel_task.next = &g_task_kernel_task;
+    g_task_kernel_task.prev = &g_task_kernel_task;
+    g_task_active = &g_task_kernel_task;
 }
 
-void* syscall_sbrk(int incr) {
-
-    void* target_addr = (void*)task_active->brk + incr;
-    void* current_addr = (void*)task_active->brk;
-
-    if(task_active->brk_limit < (uint32_t)target_addr)
-        return (void*)-ENOMEM;
-
-    vmem_lock_region(current_addr, incr);
-    task_active->brk = (uint32_t)target_addr;
-
-    dbglogf(":: syscall_sbrk :: %s :: %p\n", task_active->name, task_active->brk);
-
-    return current_addr;
+void task_set_active(task_t* task) {
 }

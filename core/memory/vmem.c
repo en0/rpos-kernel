@@ -218,6 +218,15 @@ void* vmem_allocate_kernel_heap_page() {
     return NULL;
 }
 
+void vmem_lock_region(void* addr, size_t size) {
+
+    uint32_t first_frame = addr_to_frame(addr);
+    uint32_t last_frame = addr_to_frame((addr+size-1));
+
+    for(;first_frame <= last_frame; first_frame++)
+        bitmap_add(&g_vmem_map, first_frame);
+}
+
 void vmem_free_page(void* addr, size_t size) {
     uint32_t first_frame = addr_to_frame(addr);
     uint32_t last_frame = addr_to_frame((addr+size-1));

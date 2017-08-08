@@ -38,8 +38,15 @@ void syscall_int80_read(regs_t* regs) {
 }
 
 void syscall_int80_write(regs_t* regs) {
-    dbglogf("************    You called an isr!\n"); 
-    dbglogs((char*)regs->ecx);
+    dbglogf("\n!! ISR syscall_int80_write testing stub !! \n");
+    dbglogf("--------------------------------------------------------------\n");
+
+    int i;
+    for(i = 0; i < regs->edx; i++)
+        dbglogc(((char*)regs->ecx)[i]);
+    regs->eax = i;
+
+    dbglogf("\n--------------------------------------------------------------\n");
 }
 
 void syscall_int80_open(regs_t* regs) {
