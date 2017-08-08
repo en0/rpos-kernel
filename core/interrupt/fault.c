@@ -98,7 +98,7 @@ void fault_handler(regs_t *r) {
         //kprintf("fs: %p, gs: %p, eip: %p, eflags: %b\n", r->fs, r->gs, r->eip, r->eflags);
 
         // Not recoverable.
-        halt();
+        hlt();
     }
 }
 

@@ -20,28 +20,90 @@
 
 #include <core/cpu.h>
 #include <klib/dbglog.h>
+#include <errno.h>
+
+void syscall_int80_exit(regs_t* regs) {
+    dbglogf("ISR syscall_int80_exit (%i) NOT IMPLEMENTED\n", regs->eax); for(;;hlt());
+    for(;;hlt()); 
+}
+
+void syscall_int80_fork(regs_t* regs) {
+    dbglogf("ISR syscall_int80_fork (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_read(regs_t* regs) {
+    dbglogf("ISR syscall_int80_read (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
 
 void syscall_int80_write(regs_t* regs) {
     dbglogf("************    You called an isr!\n"); 
     dbglogs((char*)regs->ecx);
 }
 
-void syscall_int80_exit(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_fork(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_read(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-//void syscall_int80_write(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_open(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_close(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_wait(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_link(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_unlink(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_execve(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_gettimeofday(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_stat(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_lseek(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_getpid(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_fstat(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_kill(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_times(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_sbrk(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
-void syscall_int80_isatty(regs_t* regs) { dbglogf("ISR %i NOT IMPLEMENTED\n", regs->eax); }
+void syscall_int80_open(regs_t* regs) {
+    dbglogf("ISR syscall_int80_open (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_close(regs_t* regs) {
+    dbglogf("ISR syscall_int80_close (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_wait(regs_t* regs) {
+    dbglogf("ISR syscall_int80_wait (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_link(regs_t* regs) {
+    dbglogf("ISR syscall_int80_link (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_unlink(regs_t* regs) {
+    dbglogf("ISR syscall_int80_unlink (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_execve(regs_t* regs) {
+    dbglogf("ISR syscall_int80_execve (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_gettimeofday(regs_t* regs) {
+    dbglogf("ISR syscall_int80_gettimeofday (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_stat(regs_t* regs) {
+    dbglogf("ISR syscall_int80_stat (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_lseek(regs_t* regs) {
+    dbglogf("ISR syscall_int80_lseek (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_getpid(regs_t* regs) {
+    dbglogf("ISR syscall_int80_getpid (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_kill(regs_t* regs) {
+    dbglogf("ISR syscall_int80_kill (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_times(regs_t* regs) {
+    dbglogf("ISR syscall_int80_times (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+
+void syscall_int80_isatty(regs_t* regs) {
+    dbglogf("ISR syscall_int80_isatty (%i) NOT IMPLEMENTED\n", regs->eax); 
+    for(;;hlt()); 
+}
+

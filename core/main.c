@@ -19,7 +19,8 @@ int main(int argc, char** argv) {
 
     dbglogf("[%p] = %i\n", x, *x);
 
-    write(0, "Hello, world!\n", 14);
+    //write(0, "Hello, world!\n", 14);
+    printf("MSG: %s", "Hello, World!");
 
     return 0;
 }

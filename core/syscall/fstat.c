@@ -18,21 +18,19 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdint.h>
-#include <core/io.h>
+#include <core/cpu.h>
+#include <klib/dbglog.h>
+#include <sys/stat.h>
+#include <errno.h>
 
-#ifndef _CORE_CPU_H
-#define _CORE_CPU_H
+int syscall_fstat(int file, struct stat *st);
 
-typedef struct regs {
-    uint32_t gs, fs, es, ds;
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    uint32_t int_no, err_code;
-    uint32_t eip, cs, eflags, useresp, ss;
-} regs_t;
+void syscall_int80_fstat(regs_t* regs) {
+    regs->eax = syscall_fstat((int)regs->ebx, (struct stat*)regs->ecx);
+}
 
-static inline void hlt() { asm("hlt"); }
-static inline void sti() { asm("sti"); }
-static inline void cli() { asm("cli"); }
+int syscall_fstat(int file, struct stat *st) {
+    st->st_mode = S_IFCHR;
+    return 0;
+}
 
-#endif

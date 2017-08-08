@@ -18,21 +18,18 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdint.h>
-#include <core/io.h>
+#include <core/cpu.h>
+#include <klib/dbglog.h>
+#include <errno.h>
 
-#ifndef _CORE_CPU_H
-#define _CORE_CPU_H
+void* syscall_sbrk(int incr);
 
-typedef struct regs {
-    uint32_t gs, fs, es, ds;
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    uint32_t int_no, err_code;
-    uint32_t eip, cs, eflags, useresp, ss;
-} regs_t;
+void syscall_int80_sbrk(regs_t* regs) {
+    regs->eax = (uint32_t)syscall_sbrk(regs->ebx);
+}
 
-static inline void hlt() { asm("hlt"); }
-static inline void sti() { asm("sti"); }
-static inline void cli() { asm("cli"); }
-
-#endif
+void* syscall_sbrk(int incr) {
+    dbglogf("SBRK is asking for %i\n", incr);
+    dbglogf("ISR syscall_int80_sbrk NOT IMPLEMENTED\n"); 
+    for(;;hlt()); 
+}

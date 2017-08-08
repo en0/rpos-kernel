@@ -18,6 +18,7 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <string.h>
 #include <stddef.h>
 #include <core/cpu.h>
 #include <klib/dbglog.h>
@@ -26,40 +27,45 @@
 #include "idt.h"
 #include "../syscall/int80.h"
 
-void(*g_isr_vectors[16])(regs_t*);
+#define ISR_VECTOR_MAX 19
+void(*g_isr_vectors[ISR_VECTOR_MAX])(regs_t*);
 
 void isr_initialize_api() {
 
     // This installs all the system calls via the int80 interface.
-    g_isr_vectors[1] = syscall_int80_exit;
-    g_isr_vectors[2] = syscall_int80_fork;
-    g_isr_vectors[3] = syscall_int80_read;
+    //memset((void*)g_isr_vectors, 0x00, 16);
+    //g_isr_vectors[1] = syscall_int80_exit;
+    //g_isr_vectors[2] = syscall_int80_fork;
+    //g_isr_vectors[3] = syscall_int80_read;
     g_isr_vectors[4] = syscall_int80_write;
-    g_isr_vectors[5] = syscall_int80_open;
-    g_isr_vectors[6] = syscall_int80_close;
-    g_isr_vectors[7] = syscall_int80_wait;
-    g_isr_vectors[9] = syscall_int80_link;
-    g_isr_vectors[10] = syscall_int80_unlink;
-    g_isr_vectors[11] = syscall_int80_execve;
-    g_isr_vectors[13] = syscall_int80_gettimeofday;
-    g_isr_vectors[18] = syscall_int80_stat;
-    g_isr_vectors[19] = syscall_int80_lseek;
-    g_isr_vectors[20] = syscall_int80_getpid;
-    g_isr_vectors[28] = syscall_int80_fstat;
-    g_isr_vectors[37] = syscall_int80_kill;
-    g_isr_vectors[43] = syscall_int80_times;
-    g_isr_vectors[45] = syscall_int80_sbrk;
-    g_isr_vectors[90] = syscall_int80_isatty;
+    //g_isr_vectors[5] = syscall_int80_open;
+    //g_isr_vectors[6] = syscall_int80_close;
+    //g_isr_vectors[7] = syscall_int80_wait;
+    //g_isr_vectors[8] = syscall_int80_link;
+    //g_isr_vectors[9] = syscall_int80_unlink;
+    //g_isr_vectors[10] = syscall_int80_execve;
+    //g_isr_vectors[11] = syscall_int80_lseek;
+    //g_isr_vectors[12] = syscall_int80_getpid;
+    //g_isr_vectors[13] = syscall_int80_kill;
+    //g_isr_vectors[14] = syscall_int80_times;
+    g_isr_vectors[15] = syscall_int80_sbrk;
+    //g_isr_vectors[16] = syscall_int80_gettimeofday;
+    //g_isr_vectors[17] = syscall_int80_stat;
+    g_isr_vectors[18] = syscall_int80_fstat;
+    //g_isr_vectors[19] = syscall_int80_isatty;
 
     // Install the int $0x80 idt gate.
     idt_setGate(0x80, &isr_stub128, IDT_FLG_PRESENT | IDT_FLG_DPL0 | IDT_FLG_INTEGATE);
 }
 
 void dispatch_isr_handler(regs_t *r) {
-    if(g_isr_vectors[r->eax] != NULL)
+
+    if(r->eax > 0 && r->eax <= ISR_VECTOR_MAX && g_isr_vectors[r->eax] != NULL)
         g_isr_vectors[r->eax](r);
-    else
+    else {
         dbglogf("WARNING: Unhandled ISR: %i", r->eax);
+        for(;;) hlt();
+    }
 }
 
 //void install_isr_handler(int num, void(*fn)(regs_t*)) {

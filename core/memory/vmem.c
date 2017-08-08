@@ -247,7 +247,7 @@ void _page_fault_handler(regs_t* reg) {
 
     if(is_pf_access_violation(reg->err_code)) {
         dbglogf("Access Violation!\n");
-        halt();
+        hlt();
     } else {
         dbglogf("Page is absent: %p!\n", addr);
         _map_single_frame(addr, NULL, VMEM_FLG_WRITABLE);

@@ -170,9 +170,7 @@ void sysinit(multiboot_info_t* mbi) {
     sti();
     main(arg_cnt, arg_values);
 
-    for(;;);
-
     // !! The stack is dead: Cannot return. !!
-    halt();
+    for(;;) hlt();
 }
 
