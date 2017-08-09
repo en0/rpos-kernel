@@ -21,8 +21,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#ifndef _KLIB_BITMAP_H
-#define _KLIB_BITMAP_H
+#ifndef _INCLUDE_RPOS_BITMAP_H
+#define _INCLUDE_RPOS_BITMAP_H
 
 typedef uint32_t bitmap_population_t;
 typedef uint32_t bitmap_index_t;
@@ -146,4 +146,4 @@ bool bitmap_find_first_absent(bitmap_info_t* map, uint32_t start, uint32_t* memb
 
 bool bitmap_find_absent_set(bitmap_info_t* map, uint32_t start, size_t cnt, uint32_t* first_member);
 
-#endif /* _KLIB_BITMAP_H */
+#endif /* _INCLUDE_RPOS_BITMAP_H */

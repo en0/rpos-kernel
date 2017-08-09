@@ -21,7 +21,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdarg.h>
-#include <klib/dbglog.h>
+#include <rpos/dbglog.h>
 
 #ifdef PROFILE_DEBUG
 

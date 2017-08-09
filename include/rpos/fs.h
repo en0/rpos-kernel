@@ -18,12 +18,31 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <rpos/cpu.h>
-#include <rpos/dbglog.h>
+#include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
 
-int syscall_fstat(int file, struct stat *st) {
-    st->st_mode = S_IFCHR;
-    return 0;
-}
+
+#ifndef _INCLUDE_RPOS_FS_H
+#define _INCLUDE_RPOS_FS_H
+
+struct file_operations;
+struct file;
+
+typedef struct file_operations {
+    int (*read)(struct file*, void*, size_t);
+    int (*write)(struct file*, void*, size_t);
+    int (*fstat)(struct file*, struct stat*);
+    int (*close)(struct file*);
+} file_operations_t;
+
+typedef struct file {
+    struct file_operations fops;
+    int mode;
+    int type;
+    int is_dir;
+    int fpos;
+    int length;
+    char* full_name;
+} file_t;
+
+#endif

@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <klib/bitmap.h>
-#include <klib/dbglog.h>
+#include <rpos/bitmap.h>
+#include <rpos/dbglog.h>
 
 bitmap_info_t* bitmap_create(size_t size) {
     /** NOT IMPLEMENTED **/

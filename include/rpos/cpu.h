@@ -18,30 +18,21 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef _CORE_TASK_H
-#define _CORE_TASK_H 1
-
 #include <stdint.h>
-#include <stdbool.h>
-#include <core/cpu.h>
+#include <rpos/io.h>
 
-typedef struct task_regs {
+#ifndef _INCLUDE_RPOS_CPU_H
+#define _INCLUDE_RPOS_CPU_H
+
+typedef struct regs {
     uint32_t gs, fs, es, ds;
     uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    uint32_t eip, cs, eflags, ss;
-} task_regs_t;
+    uint32_t int_no, err_code;
+    uint32_t eip, cs, eflags, useresp, ss;
+} regs_t;
 
-typedef struct task {
-    const char* name;
-    task_regs_t regs;
-    uint32_t pde, brk, brk_limit;
-    bool is_supervisor;
-    struct task* prev;
-    struct task* next;
-} task_t;
-
-extern task_t* g_task_active;
-void task_initialize_kernel_task(const char* name, void* heap, void* heap_limit);
-#define task_active g_task_active
+static inline void hlt() { asm("hlt"); }
+static inline void sti() { asm("sti"); }
+static inline void cli() { asm("cli"); }
 
 #endif

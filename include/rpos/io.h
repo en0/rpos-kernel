@@ -18,12 +18,30 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <rpos/cpu.h>
-#include <rpos/dbglog.h>
-#include <sys/stat.h>
-#include <errno.h>
+#ifndef _INCLUDE_RPOS_IO_H
+#define _INCLUDE_RPOS_IO_H 1
 
-int syscall_fstat(int file, struct stat *st) {
-    st->st_mode = S_IFCHR;
-    return 0;
+#include <stdint.h>
+
+static inline void outb(uint8_t val, uint16_t port) {
+    asm volatile ( "out %0, %1;"
+                 : /* no return */
+                 : "a"(val), "Nd"(port));
 }
+
+static inline uint8_t inb(uint16_t port) {
+    uint8_t val;
+    asm volatile ( "in %1, %0"
+                 : "=a"(val)
+                 : "Nd"(port));
+    return val;
+}
+
+static inline void io_wait(void)
+{
+    asm volatile ( "jmp 1f\n\t"
+                   "1:jmp 2f\n\t"
+                   "2:" );
+}
+
+#endif

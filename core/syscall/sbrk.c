@@ -18,19 +18,13 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <core/cpu.h>
-#include <core/task.h>
-#include <core/utils.h>
-#include <klib/dbglog.h>
+#include <rpos/cpu.h>
+#include <rpos/task.h>
+#include <rpos/utils.h>
+#include <rpos/dbglog.h>
 #include <errno.h>
 
 #include "../memory/vmem.h"
-
-void* syscall_sbrk(int incr);
-
-void syscall_int80_sbrk(regs_t* regs) {
-    regs->eax = (uint32_t)syscall_sbrk(regs->ebx);
-}
 
 void* syscall_sbrk(int incr) {
 

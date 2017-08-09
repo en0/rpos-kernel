@@ -18,7 +18,7 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <core/cpu.h>
+#include <rpos/cpu.h>
 
 #ifndef _INTERRUPT_ISR_H
 #define _INTERRUPT_ISR_H 1
@@ -27,6 +27,6 @@ void isr_stub128(void);
 
 void isr_initialize_api();
 void dispatch_isr_handler(regs_t *r);
-void install_isr_handler(int num, void(*fn)(regs_t*));
+void install_isr_handler();
 
 #endif

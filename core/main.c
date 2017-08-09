@@ -1,9 +1,9 @@
 #include <unistd.h>
 #include <stdio.h>
-#include <core/cpu.h>
-#include <core/task.h>
-#include <klib/dbglog.h>
-#include <klib/bitmap.h>
+#include <rpos/cpu.h>
+#include <rpos/task.h>
+#include <rpos/dbglog.h>
+#include <rpos/bitmap.h>
 
 int main(int argc, char** argv) {
 

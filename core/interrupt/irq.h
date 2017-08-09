@@ -21,7 +21,7 @@
 #ifndef _INTERRUPT_IRQ_H
 #define _INTERRUPT_IIRQ_H 1
 
-#include <core/cpu.h>
+#include <rpos/cpu.h>
 
 #define PIC0            0x20
 #define PIC0_DATA       0x21

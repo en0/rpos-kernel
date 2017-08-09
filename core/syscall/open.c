@@ -18,12 +18,19 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <rpos/cpu.h>
-#include <rpos/dbglog.h>
-#include <sys/stat.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <rpos/cpu.h>
 
-int syscall_fstat(int file, struct stat *st) {
-    st->st_mode = S_IFCHR;
-    return 0;
+/*
+int syscall_open(const char* pathname, int flags, mode_t mode);
+
+void syscall_int80_open(regs_t* regs) {
+    regs->eax = syscall_open((const char*)regs->ebx, regs->ecx, regs->edx);
 }
+
+int syscall_open(const char* pathname, int flags, mode_t mode) {
+    // The per-process limit on number of open files has been reached.
+    return -EMFILE;
+}
+*/

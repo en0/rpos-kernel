@@ -27,8 +27,8 @@
 
 #include <string.h>
 #include <kconfig.h>
-#include <core/utils.h>
-#include <klib/bitmap.h>
+#include <rpos/utils.h>
+#include <rpos/bitmap.h>
 
 #include "../interrupt/fault.h"
 #include "pmem.h"

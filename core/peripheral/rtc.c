@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <core/cpu.h>
-#include <klib/dbglog.h>
+#include <rpos/cpu.h>
+#include <rpos/dbglog.h>
 #include "../interrupt/irq.h"
 
 uint32_t _seconds;

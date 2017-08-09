@@ -18,12 +18,22 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <rpos/cpu.h>
-#include <rpos/dbglog.h>
-#include <sys/stat.h>
 #include <errno.h>
+#include <rpos/task.h>
+#include <rpos/cpu.h>
+//#include <rpos/file.h>
 
-int syscall_fstat(int file, struct stat *st) {
-    st->st_mode = S_IFCHR;
-    return 0;
+/*
+int syscall_read(int file, char *ptr, int len);
+
+void syscall_int80_read(regs_t* regs) {
+    regs->eax = syscall_read(regs->ebx, (char*)regs->ecx, regs->edx);
 }
+
+int syscall_read(int file, char *ptr, int len) {
+    return -EBADF;
+    //struct file *f = task_active->files[file];
+    //if(f == NULL) return -EBADF;
+    //return f->fops->read(f, ptr, len);
+}
+*/

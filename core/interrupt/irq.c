@@ -19,8 +19,8 @@
  **/
 
 #include <string.h>
-#include <core/cpu.h>
-#include <klib/dbglog.h>
+#include <rpos/cpu.h>
+#include <rpos/dbglog.h>
 #include "irq.h"
 #include "idt.h"
 

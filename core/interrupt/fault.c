@@ -24,8 +24,8 @@
  **/
 
 #include <string.h>
-#include <core/cpu.h>
-#include <klib/dbglog.h>
+#include <rpos/cpu.h>
+#include <rpos/dbglog.h>
 #include "idt.h"
 #include "fault.h"
 

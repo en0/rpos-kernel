@@ -18,30 +18,17 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef _CORE_IO_H
-#define _CORE_IO_H 1
+#include <errno.h>
+#include <rpos/task.h>
+#include <rpos/cpu.h>
+#include <rpos/fs.h>
+#include <rpos/dbglog.h>
 
-#include <stdint.h>
-
-static inline void outb(uint8_t val, uint16_t port) {
-    asm volatile ( "out %0, %1;"
-                 : /* no return */
-                 : "a"(val), "Nd"(port));
+int syscall_write(int file, char *ptr, int len) {
+    int i;
+    for(i = 0; i < len; dbglogc(ptr[i++]));
+    return i;
+    //struct file *f = task_active->files[file];
+    //if(f == NULL) return -EBADF;
+    //return f->fops->write(f, ptr, len);
 }
-
-static inline uint8_t inb(uint16_t port) {
-    uint8_t val;
-    asm volatile ( "in %1, %0"
-                 : "=a"(val)
-                 : "Nd"(port));
-    return val;
-}
-
-static inline void io_wait(void)
-{
-    asm volatile ( "jmp 1f\n\t"
-                   "1:jmp 2f\n\t"
-                   "2:" );
-}
-
-#endif

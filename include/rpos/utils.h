@@ -18,21 +18,26 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stdint.h>
-#include <core/io.h>
+#include <rpos/cpu.h>
+#include <rpos/dbglog.h>
 
-#ifndef _CORE_CPU_H
-#define _CORE_CPU_H
+#ifndef _INCLUDE_RPOS_UTILS_H
+#define _INCLUDE_RPOS_UTILS_H 1
 
-typedef struct regs {
-    uint32_t gs, fs, es, ds;
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-    uint32_t int_no, err_code;
-    uint32_t eip, cs, eflags, useresp, ss;
-} regs_t;
+#define align4(addr) ((uint32_t)addr & 0xFFFFF000)
+#define next_frame(addr) ((uint32_t)addr + 0x1000)
 
-static inline void hlt() { asm("hlt"); }
-static inline void sti() { asm("sti"); }
-static inline void cli() { asm("cli"); }
+#define addr_to_frame(addr) (((uint32_t)addr)>>12)
+#define frame_to_addr(page) ((void*)(page<<12))
 
-#endif
+#define addr_to_directory_index(addr) (((uint32_t)addr)>>22)
+#define directory_index_to_addr(addr) (((uint32_t)addr)<<22)
+
+#define addr_to_table_index addr_to_frame
+#define table_index_to_addr frame_to_addr
+
+#define is_flag_set(a,b) ((a & b) == b)
+
+static inline void abort(const char* m) { dbglogf("ABORT: %s\n", m); cli(); hlt(); }
+
+#endif /* _UTILS_H */

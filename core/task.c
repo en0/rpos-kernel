@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <core/task.h>
+#include <rpos/task.h>
 
 task_t* g_task_active;
 task_t g_task_kernel_task;

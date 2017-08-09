@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <klib/bitmap.h>
-#include <core/utils.h>
+#include <rpos/bitmap.h>
+#include <rpos/utils.h>
 
 #define LOW_LIMIT 0x100000
 #define BITMAP_ARR_LEN (COMPUTE_BITMAP_WORD_CNT(0x100000))

@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#ifndef _DBGLOG_H
-#define _DBGLOG_H
+#ifndef _INCLUDE_DBGLOG_H
+#define _INCLUDE_DBGLOG_H
 
 #include <kconfig.h>
 
@@ -63,4 +63,4 @@ int dbglogf(const char *format, ...);
 
 #endif /* PROFILE_DEBUG */
 
-#endif /* _DBGLOG_H */
+#endif /* _INCLUDE_DBGLOG_H */

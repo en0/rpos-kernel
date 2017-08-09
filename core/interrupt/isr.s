@@ -19,8 +19,8 @@
 ## Some of this code was addapted from 
 ## http://www.osdever.net/tutorials/view/brans-kernel-development-tutorial 
 
-                .extern dispatch_isr_handler
-                .equ handler, dispatch_isr_handler
+                .extern __isr_handler
+                .equ handler, __isr_handler
 
                 .section .text
                 .align 4

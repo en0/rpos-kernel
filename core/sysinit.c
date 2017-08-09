@@ -22,8 +22,8 @@
 #include <stdbool.h>
 
 #include <kconfig.h>
-#include <core/utils.h>
-#include <klib/dbglog.h>
+#include <rpos/utils.h>
+#include <rpos/dbglog.h>
 
 #include "boot/multiboot.h"
 
