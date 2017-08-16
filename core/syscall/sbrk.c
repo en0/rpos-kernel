@@ -28,6 +28,7 @@
 
 void* syscall_sbrk(int incr) {
 
+    dbglogf("SBRK: %i\n", incr);
     void* target_addr = (void*)task_active->brk + incr;
     void* current_addr = (void*)task_active->brk;
 

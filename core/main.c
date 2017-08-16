@@ -14,7 +14,13 @@ int main(int argc, char** argv) {
     task_initialize_kernel_task(argv[0], VIRT_ADDR_HEAP, VIRT_ADDR_EHEAP);
 
     dbglogf("System started: %s\n", task_active->name);
-    printf("MSG: %s\n", "Hello, World!");
+    //printf("MSG: %s\n", "Hello, World!");
+
+    //void* x = malloc(10);
+    //free(x);
+    //x = malloc(10);
+    //free(x);
+    //x = malloc(10);
 
     return 0;
 }
