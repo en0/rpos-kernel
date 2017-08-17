@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+###############################################################################
+## RPOS Kernel Build Configuration                                           ##
+###############################################################################
+
+## This is a bash script who's goals is to set environmental variables that
+## will be imported into the kernel.h header file and used to make compile time
+## decisitions. You can completely break the build if you do not know what you
+## are doing. Please read all the comments carefuly.
+
+declare -a CONFIG
+
+##==============================================================================
+##= MM : Physical Memory manager
+##= Specify the module to use for physical memory alocation. Exactly 1 option
+##= must be selected.
+##==============================================================================
+CONFIG+=(MM_BITMAP) # Use a bitmap to manage physical memory
+#CONFIG+=(MM_STACK) # Use a stack to manage physical memory
+
+
+##==============================================================================
+##= EXp_BOOTPARAMS : Experimental feature, boot parameters.
+##= This will allow the user to select various features of the on boot.
+##==============================================================================
+#CONFIG+=(EXP_BOOTPARAMS)
+
+###############################################################################
+## Do not edit anything below this line.                                     ##
+###############################################################################
+
+for i in "${CONFIG[@]}"; do
+    export KBUILD_${i}=_${i}
+done
+
+envsubst < ${1}
