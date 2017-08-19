@@ -81,4 +81,7 @@
 #define KERNEL_HEAP         ((heap_info_t *)VIRT_ADDR_HEAP)
 #define STACK_SIZE          ((uint32_t)(VIRT_ADDR_STACK - VIRT_ADDR_ESTACK))
 
+extern PageFrameAllocator_t bitmap_pfa;
+extern VirtFrameManager_t basic_vfm;
+
 #endif /* ! _ARCH_MM_H */

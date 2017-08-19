@@ -35,8 +35,6 @@ void parse_cmdline_params(char*);
 #endif /* MODULE_EXP_BOOTPARAMS */
 
 extern multiboot_info_t *g_mboot_info;
-extern PageFrameAllocator_t pfa_bitmap;
-extern VirtFrameManager_t vfm_basic;
 
 void activate_kernel_selector();
 void i386_start_kernel();

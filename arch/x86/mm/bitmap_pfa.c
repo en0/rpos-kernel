@@ -25,7 +25,7 @@
 #include <rpos/log.h>
 
 static BitmapInfo_t *bits;
-static void *_init_bitmap_frame_allocator(void*, size_t);
+static void *_init_frame_allocator(void*, size_t);
 
 static void _free_frame(void *addr) {
     // Refuse to free address 0x00.
@@ -95,17 +95,7 @@ static void* _alloc_frames(size_t bytes) {
     return frame_to_addr(frame);
 }
 
-const PageFrameAllocator_t pfa_bitmap = {
-    .alloc_frame = _alloc_frame,
-    .alloc_frames = _alloc_frames,
-    .free_frame = _free_frame,
-    .free_frames = _free_frames,
-    .lock_frame = _lock_frame,
-    .lock_frames = _lock_frames,
-    .pfa_init = _init_bitmap_frame_allocator
-};
-
-static void *_init_bitmap_frame_allocator(void *data, size_t mem_size_bytes) {
+static void *_init_frame_allocator(void *data, size_t mem_size_bytes) {
 
     uint32_t *storage = data;
 
@@ -134,3 +124,13 @@ static void *_init_bitmap_frame_allocator(void *data, size_t mem_size_bytes) {
     // Return the end of the region used for the memory map.
     return &storage[word_cnt + 1];
 }
+
+PageFrameAllocator_t bitmap_pfa = {
+    .alloc_frame = _alloc_frame,
+    .alloc_frames = _alloc_frames,
+    .free_frame = _free_frame,
+    .free_frames = _free_frames,
+    .lock_frame = _lock_frame,
+    .lock_frames = _lock_frames,
+    .pfa_init = _init_frame_allocator
+};

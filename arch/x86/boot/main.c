@@ -76,7 +76,7 @@ static size_t setup_boot_pfa(uint32_t *mm_storage_start) {
 
     // Initialize the basic bitmap PFA.
     void* mm_storage_end = 
-        pfa_bitmap.pfa_init(mm_storage_start, total_memory_bytes);
+        bitmap_pfa.pfa_init(mm_storage_start, total_memory_bytes);
 
     // Free the memory that the bootloader identified as available.
     for(multiboot_memory_map_t *mmap = (multiboot_memory_map_t*) mbi->mmap_addr;
@@ -84,18 +84,18 @@ static size_t setup_boot_pfa(uint32_t *mm_storage_start) {
         mmap = (multiboot_memory_map_t*) ((unsigned long) mmap + mmap->size + sizeof (mmap->size))) {
 
         if(mmap->type == 1)
-            pfa_bitmap.free_frames((void*)((uint32_t)mmap->addr), (uint32_t)mmap->len);
+            bitmap_pfa.free_frames((void*)((uint32_t)mmap->addr), (uint32_t)mmap->len);
     }
 
     // Lock the kernel all the way to the end of the memory map.
     // This will lock any modules stored in memory as well.
-    pfa_bitmap.lock_frames(PHYS_ADDR_KSTART, mm_storage_end - PHYS_ADDR_KSTART);
+    bitmap_pfa.lock_frames(PHYS_ADDR_KSTART, mm_storage_end - PHYS_ADDR_KSTART);
 
     // Lock video memory
-    pfa_bitmap.lock_frame(PHYS_ADDR_VGA3);
+    bitmap_pfa.lock_frame(PHYS_ADDR_VGA3);
 
-    // Install pfa_bitmap for the rest of the system to use.
-    attach_frame_allocator(&pfa_bitmap);
+    // Install bitmap_pfa for the rest of the system to use.
+    attach_frame_allocator(&bitmap_pfa);
 
     log.printf("=> x86_boot :: PFA Ready => [%p - %p] - %i Kb\n", mm_storage_start, mm_storage_end, ((void*)mm_storage_end - (void*)mm_storage_start)>>10);
 
@@ -105,10 +105,10 @@ static size_t setup_boot_pfa(uint32_t *mm_storage_start) {
 static void setup_boot_vfm(MemoryRegionInfo_t *region_map, size_t region_map_cnt) {
 
     // Initialize the virtual frame manager.
-    vfm_basic.vfm_init(region_map, region_map_cnt);
+    basic_vfm.vfm_init(region_map, region_map_cnt);
 
     // Install the virtual frame manager for global system use.
-    attach_virtual_frame_manager(&vfm_basic);
+    attach_virtual_frame_manager(&basic_vfm);
 
     log.printf("=> x86_boot :: VFM Ready => [%p - %p] - %i Kb\n", VIRT_ADDR_PGPTE, 0xFFFFFFFF, (0xFFFFFFFF - (uint32_t)VIRT_ADDR_PGPTE)>>10);
 }

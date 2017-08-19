@@ -28,8 +28,6 @@
 uint32_t* g_vmem_page_dir;
 uint32_t* g_vmem_page_tbl = VIRT_ADDR_PGPTE;
 
-static void *_init_basic_virtual_frame_allocator(MemoryRegionInfo_t*, size_t);
-
 static inline uint32_t get_cr3() {
     uint32_t addr;
     asm volatile( "mov %%cr2, %0" : "=r"(addr));
@@ -119,12 +117,7 @@ static void _initialize_map_region(MemoryRegionInfo_t *region) {
     }
 }
 
-const VirtFrameManager_t vfm_basic = {
-    .kmap = _kmap,
-    .vfm_init = _init_basic_virtual_frame_allocator
-};
-
-static void *_init_basic_virtual_frame_allocator(MemoryRegionInfo_t* info, size_t count) {
+static void *_init_virtual_frame_allocator(MemoryRegionInfo_t* info, size_t count) {
 
     uint32_t dir_index = addr_to_directory_index(VIRT_ADDR_PGPDE);
 
@@ -150,3 +143,8 @@ static void *_init_basic_virtual_frame_allocator(MemoryRegionInfo_t* info, size_
 
     return NULL;
 }
+
+VirtFrameManager_t basic_vfm = {
+    .kmap = _kmap,
+    .vfm_init = _init_virtual_frame_allocator
+};
