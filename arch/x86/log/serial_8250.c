@@ -19,7 +19,7 @@
  **/
 
 #include <rpos/log.h>
-#include <cpu/io.h>
+#include <arch/io.h>
 
 #include <log/serial.h>
 

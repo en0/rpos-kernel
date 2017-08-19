@@ -22,12 +22,22 @@
 
 static VirtFrameManager_t *vfm;
 
-void kmap(void* phys, void* virt) {
-    vfm->kmap(phys, virt);
+void kmap(void* phys, void* virt, VFMAccessFlags flags) {
+    vfm->kmap(phys, virt, flags);
+}
+
+void kunmap(void *virt) {
+    vfm->kunmap(virt);
+}
+
+void* physat(void *virt) {
+    return vfm->physat(virt);
 }
 
 void attach_virtual_frame_manager(VirtFrameManager_t *p) {
     static VirtFrameManager_t _vfm;
     _vfm.kmap = p->kmap;
+    _vfm.kunmap = p->kunmap;
+    _vfm.physat = p->physat;
     vfm = &_vfm;
 }

@@ -20,7 +20,7 @@
 
 #include <stddef.h>
 #include <string.h>
-#include <rpos/mm.h>
+#include <arch/mm.h>
 #include <algo/bitmap.h>
 #include <rpos/log.h>
 

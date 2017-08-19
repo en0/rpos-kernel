@@ -2,8 +2,8 @@
 #include <rpos/log.h>
 #include <rpos/init.h>
 #include <rpos/irq.h>
-#include <cpu/io.h>
-#include <cpu/core.h>
+#include <arch/io.h>
+#include <arch/core.h>
 #include <asm/i8259.h>
 
 #define PIC0            0x20

@@ -23,7 +23,6 @@
 #include <rpos/kernel.h>
 #include <rpos/const.h>
 #include <rpos/log.h>
-#include <rpos/mm.h>
 #include <log/serial.h>
 #include <asm/segment.h>
 
@@ -51,57 +50,86 @@ static void setup_boot_idt() {
     log.printf("=> x86_boot :: IDT => [%p], (NULL)\n", &idt);
 }
 
-static void setup_boot_pfa() {
+static void* find_physical_heap_start() {
 
-    uint32_t *mm_storage = (uint32_t*)&_end;
+    // Default to end of kernel.
+    void* heap_start = PHYS_ADDR_KEND;
+
+    // If we have kernel modules loaded, then the end is after the last one.
+    multiboot_module_t *mod = (multiboot_module_t*)g_mboot_info->mods_addr;
+    if(g_mboot_info->mods_count > 0)
+        heap_start = (void*)mod[g_mboot_info->mods_count-1].mod_end;
+
+    // Align on the next page boundry if needed.
+    if(!is_align4(heap_start))
+        heap_start = (void*)next_frame(heap_start);
+
+    return heap_start;
+}
+
+static size_t setup_boot_pfa(uint32_t *mm_storage_start) {
+
     multiboot_info_t *mbi = g_mboot_info;
-    multiboot_module_t *mod_info = (multiboot_module_t *)mbi->mods_addr;
-
-    // If there are modules, _end is not available. Find the end of the modules.
-    if(mbi->mods_count > 0)
-        mm_storage = (uint32_t*)mod_info[mbi->mods_count-1].mod_end;
-
-    // Make sure the bitmap is on a 4k boundry
-    if(!is_align4(mm_storage))
-        mm_storage = (uint32_t*)next_frame(mm_storage);
 
     // Memory comes in from multiboot as KB. Convert to bytes
     uint32_t total_memory_bytes = (mbi->mem_lower + mbi->mem_upper)<<10;
 
     // Initialize the basic bitmap PFA.
     void* mm_storage_end = 
-        pfa_bitmap.pfa_init(mm_storage, total_memory_bytes);
+        pfa_bitmap.pfa_init(mm_storage_start, total_memory_bytes);
 
     // Free the memory that the bootloader identified as available.
     for(multiboot_memory_map_t *mmap = (multiboot_memory_map_t*) mbi->mmap_addr;
         (unsigned long) mmap < mbi->mmap_addr + mbi->mmap_length;
         mmap = (multiboot_memory_map_t*) ((unsigned long) mmap + mmap->size + sizeof (mmap->size))) {
 
-        if(mmap->type == 1) {
-            log.printf("REGION: [%p - %p]\n", (uint32_t)mmap->addr, (uint32_t)mmap->addr + (uint32_t)mmap->len);
+        if(mmap->type == 1)
             pfa_bitmap.free_frames((void*)((uint32_t)mmap->addr), (uint32_t)mmap->len);
-        }
     }
 
-    // Lock kernel memory regions (physcial space).
-    pfa_bitmap.lock_frames(PHYS_ADDR_KSTART, KERNEL_SIZE);
-
-    // Lock the bitmap memory itself
-    pfa_bitmap.lock_frames(mm_storage, mm_storage_end - (void*)mm_storage);
+    // Lock the kernel all the way to the end of the memory map.
+    // This will lock any modules stored in memory as well.
+    pfa_bitmap.lock_frames(PHYS_ADDR_KSTART, mm_storage_end - PHYS_ADDR_KSTART);
 
     // Lock video memory
     pfa_bitmap.lock_frame(PHYS_ADDR_VGA3);
 
-    if(mbi->mods_count > 0) {
-        // Lock the modules info structure and ramdisk module.
-        pfa_bitmap.lock_frames((void*)mbi->mods_addr, sizeof(uint32_t));
-        pfa_bitmap.lock_frames((void*)mod_info->mod_start, mod_info->mod_end - mod_info->mod_start);
-    }
-
     // Install pfa_bitmap for the rest of the system to use.
     attach_frame_allocator(&pfa_bitmap);
 
-    log.printf("=> x86_boot :: mm_storage => [%p - %p] - %i Kb\n", mm_storage, mm_storage_end, ((void*)mm_storage_end - (void*)mm_storage)>>10);
+    log.printf("=> x86_boot :: PFA Ready => [%p - %p] - %i Kb\n", mm_storage_start, mm_storage_end, ((void*)mm_storage_end - (void*)mm_storage_start)>>10);
+
+    return (void*)mm_storage_end - (void*)mm_storage_start;
+}
+
+static void setup_boot_vfm(MemoryRegionInfo_t *region_map, size_t region_map_cnt) {
+
+    // Initialize the virtual frame manager.
+    vfm_basic.vfm_init(region_map, region_map_cnt);
+
+    // Install the virtual frame manager for global system use.
+    attach_virtual_frame_manager(&vfm_basic);
+
+    log.printf("=> x86_boot :: VFM Ready => [%p - %p] - %i Kb\n", VIRT_ADDR_PGPTE, 0xFFFFFFFF, (0xFFFFFFFF - (uint32_t)VIRT_ADDR_PGPTE)>>10);
+}
+
+void static setup_boot_mm() {
+
+    void* phys_heap = find_physical_heap_start();
+
+    // Setup a boot-time PFA > returns the number of bytes used from the heap.
+    size_t phys_heap_used = setup_boot_pfa(phys_heap);
+
+    // Build a struct with the map of all the memory we need into paging.
+    MemoryRegionInfo_t region_map[] = {
+        { PHYS_ADDR_KSTART, VIRT_ADDR_KSTART, KERNEL_SIZE, VFM_FLG_WRITE },
+        { PHYS_ADDR_VGA3, VIRT_ADDR_VGA3, 4096, VFM_FLG_WRITE },
+        { phys_heap, phys_heap, phys_heap_used, VFM_FLG_WRITE },
+        { NULL, VIRT_ADDR_ESTACK,  STACK_SIZE, VFM_FLG_WRITE },
+    }; size_t region_map_cnt = sizeof(region_map) / sizeof(MemoryRegionInfo_t);
+
+    // Setup a boot-time VFM.
+    setup_boot_vfm(region_map, region_map_cnt);
 }
 
 static int __used split_cmdline(const char *argv[], size_t arg_max) {
@@ -128,21 +156,26 @@ void x86_boot_entry(void) {
     setup_boot_gdt();
     activate_kernel_selector();
 
-    // Setup a boot-time PFA.
-    setup_boot_pfa();
+    // setup boot-time memory management
+    setup_boot_mm();
 
     // Idea about virtual memory managent
     //
+    // -- These are very platform specific
     // pfa: physical frame allocator
     // vpm: virtual page manager
+    //
+    // -- This should not be platform specific.
     // vha: virtual heap allocator
     //
+    // -- Right now this is implemented in /mm but it should be in /arch/*/mm
     // vfm->kmap - Map phys to virt <<-- This is the one right now. YOU ARE HERE
+    // vfm->kunmap - Unmap a virtual address.
     // vfm->physat - get the physical at virtual frame
     //
     // kmalloc - allocate fractional memory frames from the kernel heap.
     // kfree - deallocate fractional memory frames to the kernel heap.
-    // vfalloc - allocate a virtual frame nomap ?? not sure i want this.
+    // vmalloc - allocate a virtual frame nomap ?? not sure i want this.
 
     // Split commandline options into argv
 #define ARGC_MAX 32

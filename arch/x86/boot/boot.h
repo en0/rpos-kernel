@@ -18,8 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
+#include <arch/mm.h>
 #include "multiboot.h"
-#include <rpos/mm.h>
 
 #ifndef _x86_BOOT_BOOT_H
 #define _x86_BOOT_BOOT_H
@@ -36,6 +36,7 @@ void parse_cmdline_params(char*);
 
 extern multiboot_info_t *g_mboot_info;
 extern PageFrameAllocator_t pfa_bitmap;
+extern VirtFrameManager_t vfm_basic;
 
 void activate_kernel_selector();
 void i386_start_kernel();

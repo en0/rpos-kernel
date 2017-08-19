@@ -19,22 +19,10 @@
  **/
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifndef _RPOS_MM_H
 #define _RPOS_MM_H 1
-
-#define _4K 0x1000
-#define _16M 0x1000000
-
-#define FRAME_SIZE _4K
-#define HIGH_MEM _16M
-#define HIGH_MEM_FRAME (HIGH_MEM>>12)
-
-#define align4(addr) ((uint32_t)(addr) & 0xFFFFF000)
-#define is_align4(addr) (align4(addr) == (uint32_t)addr)
-#define next_frame(addr) (align4((uint32_t)addr + 0x1000))
-#define addr_to_frame(addr) (((uint32_t)addr)>>12)
-#define frame_to_addr(page) ((void*)(page<<12))
 
 typedef struct PageFrameAllocator {
     void*(*alloc_frame)();
@@ -155,8 +143,8 @@ void free_frames(void *addr, size_t bytes);
  *
  * Install the given page frame allocator.
  * 
- * the FPA is a pluggable system. This method can be used to switch to
- * diffrent modules. Module data is not synced on change.
+ * Note: This method makes mo effort to sync allocation inforation when a new 
+ * PFA is installed.
  *
  * Arguments:
  *  pfa: A pointer to a PageFrameAllocator
@@ -167,27 +155,89 @@ void free_frames(void *addr, size_t bytes);
 
 void attach_frame_allocator(PageFrameAllocator_t* p);
 
+/***
+ * Start VFM headers
+ ***/
+
+#define VFM_FLG_WRITE       (1<<0)
+#define VFM_FLG_SUPERVISOR  (1<<1)
+
+typedef uint8_t VFMAccessFlags;
+
+typedef struct MemoryRegionInfo {
+    void *phys_addr; 
+    void *virt_addr; 
+    size_t byte_len; 
+    VFMAccessFlags flags;
+} MemoryRegionInfo_t;
+
 typedef struct VirtFrameManager {
-    void(*kmap)(void*,void*);
-    // This is going to need some sort of region map
-    void*(*vfm_init)(void*);
+    void(*kmap)(void*,void*,VFMAccessFlags);
+    void(*kunmap)(void*);
+    void*(*physat)(void*);
+    void*(*vfm_init)(MemoryRegionInfo_t*, size_t);
 } VirtFrameManager_t;
 
 /*
- * kmap(phys, virt)
+ * kmap(phys, virt, flags)
  *
- * Map a given physical frame to a given virtual frame.
- * NOTE: Both address should be 4kb aligned.
+ * Map a physical frame to a virtual frame.
+ * NOTE: Both addresses should be 4kb aligned.
  *
  * Arguments:
- *  phys: A 4k aligned address to a physical page frame.
- *  virt: A 4k alinged address to a virtual page frame.
+ *  phys: A 4k aligned physical address.
+ *  virt: A 4k alinged virtual address.
+ *  flags: The flags to place on the new page
  *
  * Return:
  *  None.
  */
 
-void kmap(void* phys, void* virt);
+void kmap(void* phys, void* virt, VFMAccessFlags flags);
+
+/*
+ * kunmap(virt)
+ *
+ * Unmap a frame.
+ *
+ * Arguments:
+ *  virt: A 4k aligned virtual address.
+ *
+ * Return:
+ *  None
+ */
+
+void kunmap(void* virt);
+
+/*
+ * physat(virt)
+ *
+ * Retrieve a mapped physical address.
+ *
+ * Arguments:
+ *  virt: A 4k aligned virtual address.
+ *
+ * Return:
+ *  If the virtual address is mapped, the physical address is returned. Else,
+ *  NULL.
+ */
+
+void* physat(void* virt);
+
+/*
+ * attach_virtual_frame_manager(vfm)
+ *
+ * Install a virtual frame allocator
+ *
+ * Note: This method makes mo effort to sync mapping inforation when a new VFM
+ * is installed.
+ *
+ * Arguments:
+ *  pfa: A pointer to a VirtualFrameManager
+ *
+ * Return:
+ *  None
+ */ 
 
 void attach_virtual_frame_manager(VirtFrameManager_t*);
 
