@@ -21,10 +21,10 @@ CONFIG+=(MM_BITMAP) # Use a bitmap to manage physical memory
 
 
 ##==============================================================================
-##= EXp_BOOTPARAMS : Experimental feature, boot parameters.
-##= This will allow the user to select various features of the on boot.
+##= Huge Kernel Stack
+##= When enabled, this will give a full 8 MB stack to the kernel.
 ##==============================================================================
-#CONFIG+=(EXP_BOOTPARAMS)
+#CONFIG+=(HUGE_KERNEL_STACK)
 
 ###############################################################################
 ## Do not edit anything below this line.                                     ##

@@ -24,6 +24,7 @@
 #include <log/serial.h>
 
 void i386_start_kernel() {
+
      /*
       * This code should:
       *

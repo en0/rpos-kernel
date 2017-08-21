@@ -24,19 +24,10 @@
 #ifndef _x86_BOOT_BOOT_H
 #define _x86_BOOT_BOOT_H
 
-#ifdef MODULE_EXP_BOOTPARAMS
-#define BOOT_PARAMETER_MAX_LENGTH 256
-typedef struct BootParameters {
-    // put command-line options here.
-    char mm[BOOT_PARAMETER_MAX_LENGTH];
-} BootParameters_t;
-extern BootParameters_t *g_boot_parameters;
-void parse_cmdline_params(char*);
-#endif /* MODULE_EXP_BOOTPARAMS */
-
 extern multiboot_info_t *g_mboot_info;
 
 void activate_kernel_selector();
+void activate_kernel_stack();
 void i386_start_kernel();
 
 #endif

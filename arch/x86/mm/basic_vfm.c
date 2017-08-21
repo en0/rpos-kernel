@@ -25,8 +25,8 @@
 #include <rpos/utils.h>
 #include <rpos/log.h>
 
-uint32_t* g_vmem_page_dir;
-uint32_t* g_vmem_page_tbl = VIRT_ADDR_PGPTE;
+static uint32_t* page_dir;
+static uint32_t* page_tbl = VIRT_ADDR_PGPTE;
 
 static inline uint32_t get_cr3() {
     uint32_t addr;
@@ -63,6 +63,8 @@ static uint8_t flags_to_arch_flags(VFMAccessFlags flags) {
     return ret;
 }
 
+// TODO: This should be vmap(page**, count, flags, perms) but i need a heap
+// allocator first 
 static void _kmap(void* phys, void* virt, VFMAccessFlags flags) {
 
     uint32_t tbl_index = addr_to_table_index(virt);
@@ -71,7 +73,7 @@ static void _kmap(void* phys, void* virt, VFMAccessFlags flags) {
     if(phys == NULL)
         phys = alloc_frame();
 
-    g_vmem_page_tbl[tbl_index] =
+    page_tbl[tbl_index] =
         align4(phys) | arch_flags | x86_FLG_PG_PRESENT;
 
     _invalidate_page_table_entry(virt);
@@ -107,7 +109,7 @@ static void _initialize_map_region(MemoryRegionInfo_t *region) {
         // Lookup the physical table location
         dir_index = addr_to_directory_index(v);
         tbl_index = addr_to_table_index(v);
-        tbl = (uint32_t*)(g_vmem_page_dir[dir_index] & 0xFFFFF000);
+        tbl = (uint32_t*)(page_dir[dir_index] & 0xFFFFF000);
 
         // Add the page to the page table.
         tbl[tbl_index & 0x3ff] = 
@@ -121,25 +123,25 @@ static void *_init_virtual_frame_allocator(MemoryRegionInfo_t* info, size_t coun
 
     uint32_t dir_index = addr_to_directory_index(VIRT_ADDR_PGPDE);
 
-    g_vmem_page_dir = alloc_frame();
-    memset(g_vmem_page_dir, 0x00, 1024*sizeof(uint32_t));
+    page_dir = alloc_frame();
+    memset(page_dir, 0x00, 1024*sizeof(uint32_t));
 
-    g_vmem_page_dir[dir_index] = 
-        (uint32_t)g_vmem_page_dir | x86_FLG_PG_PRESENT | x86_FLG_PG_WRITE | x86_FLG_PG_GLOBAL;
+    page_dir[dir_index] = 
+        (uint32_t)page_dir | x86_FLG_PG_PRESENT | x86_FLG_PG_WRITE | x86_FLG_PG_GLOBAL;
 
     // Fill all page directory entries with a valid reference to a page table.
     uint32_t i, *tbl;
     for(i = 0; i < dir_index; i++) {
         tbl = alloc_frame();
-        g_vmem_page_dir[i] = (uint32_t)tbl | x86_FLG_PG_PRESENT | x86_FLG_PG_WRITE;
+        page_dir[i] = (uint32_t)tbl | x86_FLG_PG_PRESENT | x86_FLG_PG_WRITE;
         memset(tbl, 0x00, 0x1000);
     }
 
     for(int i = 0; i < count; i++)
         _initialize_map_region(&info[i]);
 
-    asm volatile("mov %0, %%cr3;" : : "r"(g_vmem_page_dir));
-    g_vmem_page_dir = VIRT_ADDR_PGPDE;
+    asm volatile("mov %0, %%cr3;" : : "r"(page_dir));
+    page_dir = VIRT_ADDR_PGPDE;
 
     return NULL;
 }

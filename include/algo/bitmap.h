@@ -29,7 +29,7 @@ typedef struct BitmapInfo {
     size_t word_cnt;
     //uint32_t population;
     uint32_t* bitmap_arr;
-} BitmapInfo_t;
+} __attribute__((__packed__)) BitmapInfo_t;
 
 #define BITMAP_BYTES_PER_WORD (sizeof(uint32_t))
 #define BITMAP_BITS_PER_WORD (BITMAP_BYTES_PER_WORD * 8)

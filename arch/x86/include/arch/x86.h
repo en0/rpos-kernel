@@ -18,37 +18,8 @@
  ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **/
 
-#include <stddef.h>
-#include <rpos/kernel-common.h>
+#ifndef _ARCH_X86_H
+#define _ARCH_X86_H 1
 
-#ifndef _RPOS_KERNEL_H
-#define _RPOS_KERNEL_H 1
+#endif /* ! _ARCH_X86_H */
 
-/* Provided by linker */
-extern void* _begin;
-extern void* _end;
-
-/*
- * Modules are configured as a prebuild step. Do not edit these directly unless
- * you are modifing the available modules.
- */
-
-#define MODULE
-
-#ifndef MODULE${KBUILD_MM_BITMAP}
-#define MODULE_MM_BITMAP 1
-#endif
-
-#ifndef MODULE${KBUILD_MM_STACK}
-#define MODULE_MM_STACK 1
-#endif
-
-#ifndef MODULE${KBUILD_HUGE_KERNEL_STACK}
-#define HUGE_KERNEL_STACK 1
-#endif
-
-#define PROFILE_NAME "${PROFILE}"
-#define PROFILE_${PROFILE} 1
-#define BUILD_TARGET "${TARGET}"
-
-#endif /* _RPOS_KERNEL_H */

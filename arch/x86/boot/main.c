@@ -67,16 +67,18 @@ static void* find_physical_heap_start() {
     return heap_start;
 }
 
-static size_t setup_boot_pfa(uint32_t *mm_storage_start) {
+static void setup_boot_pfa() {
 
     multiboot_info_t *mbi = g_mboot_info;
 
-    // Memory comes in from multiboot as KB. Convert to bytes
-    uint32_t total_memory_bytes = (mbi->mem_lower + mbi->mem_upper)<<10;
+    void* phys_heap = find_physical_heap_start();
 
-    // Initialize the basic bitmap PFA.
-    void* mm_storage_end = 
-        bitmap_pfa.pfa_init(mm_storage_start, total_memory_bytes);
+    // Memory comes in from multiboot as KB. Convert to bytes
+    uint32_t total_memory = (mbi->mem_lower + mbi->mem_upper)<<10;
+
+    // Create a new instance of the bitmap PFA and install it
+    PageFrameAllocator_t *pfa = initialize_bitmap_pfa(phys_heap,total_memory);
+    attach_frame_allocator(pfa);
 
     // Free the memory that the bootloader identified as available.
     for(multiboot_memory_map_t *mmap = (multiboot_memory_map_t*) mbi->mmap_addr;
@@ -84,26 +86,27 @@ static size_t setup_boot_pfa(uint32_t *mm_storage_start) {
         mmap = (multiboot_memory_map_t*) ((unsigned long) mmap + mmap->size + sizeof (mmap->size))) {
 
         if(mmap->type == 1)
-            bitmap_pfa.free_frames((void*)((uint32_t)mmap->addr), (uint32_t)mmap->len);
+            free_frames((void*)((uint32_t)mmap->addr), (uint32_t)mmap->len);
     }
 
-    // Lock the kernel all the way to the end of the memory map.
+    // Get the physical memory info
+    PageFrameAllocatorInfo_t info;
+    pfa_info(&info);
+
+    // Lock the kernel all the way to the end of the memory managers memory
     // This will lock any modules stored in memory as well.
-    bitmap_pfa.lock_frames(PHYS_ADDR_KSTART, mm_storage_end - PHYS_ADDR_KSTART);
+    lock_frames(PHYS_ADDR_KSTART, info.manager_memory_end - PHYS_ADDR_KSTART);
 
     // Lock video memory
-    bitmap_pfa.lock_frame(PHYS_ADDR_VGA3);
+    lock_frame(PHYS_ADDR_VGA3);
 
-    // Install bitmap_pfa for the rest of the system to use.
-    attach_frame_allocator(&bitmap_pfa);
-
-    log.printf("=> x86_boot :: PFA Ready => [%p - %p] - %i Kb\n", mm_storage_start, mm_storage_end, ((void*)mm_storage_end - (void*)mm_storage_start)>>10);
-
-    return (void*)mm_storage_end - (void*)mm_storage_start;
+    pfa_info(&info);
+    log.printf("=> x86_boot :: PFA Ready => [%p - %p] - %i Kb\n", info.manager_memory_start, info.manager_memory_end, (info.manager_memory_end - info.manager_memory_start)>>10);
 }
 
 static void setup_boot_vfm(MemoryRegionInfo_t *region_map, size_t region_map_cnt) {
 
+    /*
     // Initialize the virtual frame manager.
     basic_vfm.vfm_init(region_map, region_map_cnt);
 
@@ -111,10 +114,19 @@ static void setup_boot_vfm(MemoryRegionInfo_t *region_map, size_t region_map_cnt
     attach_virtual_frame_manager(&basic_vfm);
 
     log.printf("=> x86_boot :: VFM Ready => [%p - %p] - %i Kb\n", VIRT_ADDR_PGPTE, 0xFFFFFFFF, (0xFFFFFFFF - (uint32_t)VIRT_ADDR_PGPTE)>>10);
+    */
 }
 
-void static setup_boot_mm() {
+static void setup_boot_vha() {
+    /*
+    basic_vha.vha_init(VIRT_ADDR_HEAP, VIRT_ADDR_HEAP - VIRT_ADDR_EHEAP);
+    */
+}
 
+static void setup_boot_mm() {
+
+
+    /*
     void* phys_heap = find_physical_heap_start();
 
     // Setup a boot-time PFA > returns the number of bytes used from the heap.
@@ -130,6 +142,18 @@ void static setup_boot_mm() {
 
     // Setup a boot-time VFM.
     setup_boot_vfm(region_map, region_map_cnt);
+
+    // Setup a boot-time VHA.
+    setup_boot_vha();
+
+    // Print info
+    PageFrameAllocatorInfo_t *_pfa_info = pfa_info();
+
+    log.printf("=> x86_boot :: Total Physical Memory - %i Mb\n", _pfa_info->total_memory>>20);
+    log.printf("=> x86_boot :: Used Physical Memory  - %i Kb\n", _pfa_info->used_memory>>10);
+    log.printf("=> x86_boot :: Free Physical Memory  - %i Kb\n", _pfa_info->free_memory>>10);
+    log.printf("=> x86_boot :: PFM Frame Size        - %i Bytes\n", _pfa_info->frame_size);
+    */
 }
 
 static int __used split_cmdline(const char *argv[], size_t arg_max) {
@@ -148,7 +172,6 @@ void x86_boot_entry(void) {
 
     log.attach(&log_target_com1);
     log.printf("=> x86_boot :: Start @ x86_boot_entry => [%p]\n", x86_boot_entry);
-    log.printf("=> x86_boot :: Total Memory - %i Mb\n", (g_mboot_info->mem_lower + g_mboot_info->mem_upper)>>10);
     log.printf("=> x86_boot :: Kernel Memory => [%p - %p] - %i Kb\n", &_begin, &_end,  KERNEL_SIZE / 1024);
 
     // Setup and install descriptors
@@ -157,7 +180,8 @@ void x86_boot_entry(void) {
     activate_kernel_selector();
 
     // setup boot-time memory management
-    setup_boot_mm();
+    setup_boot_pfa();
+
 
     // Idea about virtual memory managent
     //

@@ -19,40 +19,39 @@
  **/
 
 #include <rpos/mm.h>
-static PageFrameAllocator_t *pfa;
+
+static PageFrameAllocator_t *active;
+size_t frame_size;
 
 void attach_frame_allocator(PageFrameAllocator_t* p) {
-    static PageFrameAllocator_t _pfa;
-    _pfa.alloc_frame = p->alloc_frame;
-    _pfa.alloc_frames = p->alloc_frames;
-    _pfa.free_frame = p->free_frame;
-    _pfa.free_frames = p->free_frames;
-    _pfa.lock_frame = p->lock_frame;
-    _pfa.lock_frames = p->lock_frames;
-    pfa = &_pfa;
+    active = p;
+}
+
+void pfa_info(PageFrameAllocatorInfo_t* info) {
+    active->pfa_info(active, info);
 }
 
 void* alloc_frame() {
-    return pfa->alloc_frame(); 
+    return active->alloc_frame(active); 
 }
 
 void* alloc_frames(size_t bytes) {
-    return pfa->alloc_frames(bytes);
+    return active->alloc_frames(active, bytes);
 }
 
 void lock_frame(void *addr) {
-    pfa->lock_frame(addr);
+    active->lock_frame(active, addr);
 }
 
 void lock_frames(void *addr, size_t bytes) {
-    pfa->lock_frames(addr, bytes);
+    active->lock_frames(active, addr, bytes);
 }
 
 void free_frame(void *addr) {
-    pfa->free_frame(addr);
+    active->free_frame(active, addr);
 }
 
 void free_frames(void *addr, size_t bytes) {
-    pfa->free_frames(addr, bytes);
+    active->free_frames(active, addr, bytes);
 }
 

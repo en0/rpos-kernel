@@ -62,9 +62,16 @@
 /* Virtual address layout */
 #define VIRT_ADDR_PGPDE     ((void*)0xFFFFF000)
 #define VIRT_ADDR_PGPTE     ((void*)0xFFC00000)
-#define VIRT_ADDR_STACK     ((void*)0xFFBFFFFF)
+#define VIRT_ADDR_STACK     ((void*)0xFFBFFFFF) 
+
+#ifdef HUGE_KERNEL_STACK
 #define VIRT_ADDR_ESTACK    ((void*)0xFF400000)
 #define VIRT_ADDR_EHEAP     ((void*)0xFF3FFFFF)
+#else
+#define VIRT_ADDR_ESTACK    ((void*)0xFFBFE000)
+#define VIRT_ADDR_EHEAP     ((void*)0xFFBFDFFF)
+#endif
+
 #define VIRT_ADDR_HEAP      ((void*)0xC0400000)
 #define VIRT_ADDR_RAMDISK   ((void*)((uint32_t)(&_end + 0x1000) & 0xFFFFF000))
 #define VIRT_ADDR_KEND      ((void*)&_end)
@@ -81,7 +88,9 @@
 #define KERNEL_HEAP         ((heap_info_t *)VIRT_ADDR_HEAP)
 #define STACK_SIZE          ((uint32_t)(VIRT_ADDR_STACK - VIRT_ADDR_ESTACK))
 
-extern PageFrameAllocator_t bitmap_pfa;
 extern VirtFrameManager_t basic_vfm;
+extern VirtualHeapAllocator_t basic_vha;
+
+PageFrameAllocator_t *initialize_bitmap_pfa(void*,size_t);
 
 #endif /* ! _ARCH_MM_H */

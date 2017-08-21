@@ -46,4 +46,9 @@ void start_kernel();
 void arch_start_kernel();
 void start_kernel();
 
+typedef struct BootOptions {
+    char *cmdline;
+    void *mods[];
+} BootOptions_t;
+
 #endif /* ! _RPOS_INIT_H */

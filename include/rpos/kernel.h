@@ -35,20 +35,20 @@ extern void* _end;
 
 #define MODULE
 
-#ifndef MODULE${KBUILD_MM_BITMAP}
+#ifndef MODULE_MM_BITMAP
 #define MODULE_MM_BITMAP 1
 #endif
 
-#ifndef MODULE${KBUILD_MM_STACK}
+#ifndef MODULE
 #define MODULE_MM_STACK 1
 #endif
 
-#ifndef MODULE${KBUILD_HUGE_KERNEL_STACK}
+#ifndef MODULE
 #define HUGE_KERNEL_STACK 1
 #endif
 
-#define PROFILE_NAME "${PROFILE}"
-#define PROFILE_${PROFILE} 1
-#define BUILD_TARGET "${TARGET}"
+#define PROFILE_NAME "DEBUG"
+#define PROFILE_DEBUG 1
+#define BUILD_TARGET "i686-rpos"
 
 #endif /* _RPOS_KERNEL_H */

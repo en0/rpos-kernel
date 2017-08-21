@@ -1,8 +1,7 @@
 /**
  ** Copyright (c) 2017 "Ian Laird"
  ** Research Project Operating System (rpos) - https://github.com/en0/rpos
- ** 
- ** This file is part of rpos
+ ** ** This file is part of rpos
  ** 
  ** rpos is free software: you can redistribute it and/or modify
  ** it under the terms of the GNU General Public License as published by
@@ -24,15 +23,37 @@
 #ifndef _RPOS_MM_H
 #define _RPOS_MM_H 1
 
+struct PageFrameAllocator;
+
+typedef struct PageFrameAllocatorInfo {
+    size_t frame_size, total_memory, used_memory, free_memory;
+    void* manager_memory_start, *manager_memory_end;
+    struct PageFrameAllocator *pfa;
+} __attribute__((__packed__)) PageFrameAllocatorInfo_t;
+
 typedef struct PageFrameAllocator {
-    void*(*alloc_frame)();
-    void*(*alloc_frames)(size_t);
-    void(*free_frame)(void*);
-    void(*free_frames)(void*,size_t);
-    void(*lock_frame)(void*);
-    void(*lock_frames)(void*,size_t);
-    void*(*pfa_init)(void*,size_t);
-} PageFrameAllocator_t;
+    void*(*alloc_frame)(struct PageFrameAllocator*);
+    void*(*alloc_frames)(struct PageFrameAllocator*, size_t);
+    void(*free_frame)(struct PageFrameAllocator*, void*);
+    void(*free_frames)(struct PageFrameAllocator*, void*,size_t);
+    void(*lock_frame)(struct PageFrameAllocator*, void*);
+    void(*lock_frames)(struct PageFrameAllocator*, void*,size_t);
+    void(*pfa_info)(struct PageFrameAllocator*,PageFrameAllocatorInfo_t*);
+} __attribute__((__packed__)) PageFrameAllocator_t;
+
+/*
+ * pfa_info()
+ *
+ * Retrieve details about the currently installed page frame allocator.
+ *
+ * Arguments:
+ *  None
+ *
+ * Return:
+ *  A PageFrameAllocatorInfo structure.
+ */
+
+void pfa_info(PageFrameAllocatorInfo_t *);
 
 /*
  * alloc_frame()
@@ -240,5 +261,14 @@ void* physat(void* virt);
  */ 
 
 void attach_virtual_frame_manager(VirtFrameManager_t*);
+
+typedef struct VirtualHeapAllocator {
+    void*(*vmalloc)(size_t);
+    void(*vfree)(void*);
+    void(*vha_init)(void*,size_t);
+} VirtualHeapAllocator_t;
+
+void* vmalloc(size_t);
+void vfree(void*);
 
 #endif /* !_RPOS_MM_H */
