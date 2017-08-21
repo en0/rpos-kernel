@@ -91,6 +91,6 @@
 extern VirtFrameManager_t basic_vfm;
 extern VirtualHeapAllocator_t basic_vha;
 
-PageFrameAllocator_t *initialize_bitmap_pfa(void*,size_t);
+PageFrameAllocator_t *create_new_bitmap_pfa(void*,size_t);
 
 #endif /* ! _ARCH_MM_H */

@@ -20,38 +20,19 @@
 
 #include <rpos/mm.h>
 
-static PageFrameAllocator_t *active;
-size_t frame_size;
+static VirtualHeapAllocator_t *vha;
 
-void attach_frame_allocator(PageFrameAllocator_t* p) {
-    active = p;
+void* vmalloc(size_t bytes) {
+    return vha->vmalloc(bytes);
 }
 
-void frame_manager_info(PageFrameAllocatorInfo_t* info) {
-    active->frame_manager_info(active, info);
+void vfree(void *virt) {
+    vha->vfree(virt);
 }
 
-void* alloc_frame() {
-    return active->alloc_frame(active); 
+void attach_virtual_heap_allocator(VirtualHeapAllocator_t *p) {
+    static VirtualHeapAllocator_t _vha;
+    _vha.vmalloc = p->vmalloc;
+    _vha.vfree = p->vfree;
+    vha = &_vha;
 }
-
-void* alloc_frames(size_t bytes) {
-    return active->alloc_frames(active, bytes);
-}
-
-void lock_frame(void *addr) {
-    active->lock_frame(active, addr);
-}
-
-void lock_frames(void *addr, size_t bytes) {
-    active->lock_frames(active, addr, bytes);
-}
-
-void free_frame(void *addr) {
-    active->free_frame(active, addr);
-}
-
-void free_frames(void *addr, size_t bytes) {
-    active->free_frames(active, addr, bytes);
-}
-

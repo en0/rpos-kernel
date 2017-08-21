@@ -77,7 +77,7 @@ static void setup_boot_pfa() {
     uint32_t total_memory = (mbi->mem_lower + mbi->mem_upper)<<10;
 
     // Create a new instance of the bitmap PFA and install it
-    PageFrameAllocator_t *pfa = initialize_bitmap_pfa(phys_heap,total_memory);
+    PageFrameAllocator_t *pfa = create_new_bitmap_pfa(phys_heap,total_memory);
     attach_frame_allocator(pfa);
 
     // Free the memory that the bootloader identified as available.
@@ -91,7 +91,7 @@ static void setup_boot_pfa() {
 
     // Get the physical memory info
     PageFrameAllocatorInfo_t info;
-    pfa_info(&info);
+    frame_manager_info(&info);
 
     // Lock the kernel all the way to the end of the memory managers memory
     // This will lock any modules stored in memory as well.
@@ -100,7 +100,7 @@ static void setup_boot_pfa() {
     // Lock video memory
     lock_frame(PHYS_ADDR_VGA3);
 
-    pfa_info(&info);
+    frame_manager_info(&info);
     log.printf("=> x86_boot :: PFA Ready => [%p - %p] - %i Kb\n", info.manager_memory_start, info.manager_memory_end, (info.manager_memory_end - info.manager_memory_start)>>10);
 }
 

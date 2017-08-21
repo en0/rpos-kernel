@@ -112,7 +112,7 @@ static void* _alloc_frames(PFA *p, size_t bytes) {
     return frame_to_addr(frame);
 }
 
-static void _pfa_info(PFA *p, PageFrameAllocatorInfo_t *info) {
+static void _frame_manager_info(PFA *p, PageFrameAllocatorInfo_t *info) {
     CTX *ctx = (CTX*)p;
     info->total_memory = ctx->total_memory;
     info->free_memory = ctx->free_memory;
@@ -123,7 +123,7 @@ static void _pfa_info(PFA *p, PageFrameAllocatorInfo_t *info) {
     info->pfa = p;
 }
 
-PFA *initialize_bitmap_pfa(void *heap, size_t memory_size) {
+PFA *create_new_bitmap_pfa(void *heap, size_t memory_size) {
 
     uint32_t frame_cnt = addr_to_frame(memory_size);
     size_t word_cnt = bitmap_compute_word_cnt(frame_cnt);
@@ -148,7 +148,7 @@ PFA *initialize_bitmap_pfa(void *heap, size_t memory_size) {
     ctx->pfa.free_frames = _free_frames;
     ctx->pfa.lock_frame = _lock_frame;
     ctx->pfa.lock_frames = _lock_frames;
-    ctx->pfa.pfa_info = _pfa_info;
+    ctx->pfa.frame_manager_info = _frame_manager_info;
 
     return &ctx->pfa;
 }

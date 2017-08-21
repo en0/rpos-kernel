@@ -94,7 +94,7 @@ static void _vfree(void *virt) {
 
 static void _init_virtual_heap_allocator(void *heap_start, size_t heap_size) {
     PageFrameAllocatorInfo_t _frame_info;
-    pfa_info(&_frame_info);
+    frame_manager_info(&_frame_info);
     log.printf("Initilize vha with frame size: %i",_frame_info.frame_size);
 }
 

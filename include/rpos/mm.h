@@ -38,11 +38,11 @@ typedef struct PageFrameAllocator {
     void(*free_frames)(struct PageFrameAllocator*, void*,size_t);
     void(*lock_frame)(struct PageFrameAllocator*, void*);
     void(*lock_frames)(struct PageFrameAllocator*, void*,size_t);
-    void(*pfa_info)(struct PageFrameAllocator*,PageFrameAllocatorInfo_t*);
+    void(*frame_manager_info)(struct PageFrameAllocator*,PageFrameAllocatorInfo_t*);
 } __attribute__((__packed__)) PageFrameAllocator_t;
 
 /*
- * pfa_info()
+ * frame_manager_info()
  *
  * Retrieve details about the currently installed page frame allocator.
  *
@@ -53,7 +53,7 @@ typedef struct PageFrameAllocator {
  *  A PageFrameAllocatorInfo structure.
  */
 
-void pfa_info(PageFrameAllocatorInfo_t *);
+void frame_manager_info(PageFrameAllocatorInfo_t *);
 
 /*
  * alloc_frame()
