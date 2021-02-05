@@ -53,6 +53,6 @@ static inline int write_com3(char c) { write_serial(COM3_ADDR, (int)c); return 1
 static inline int write_com4(char c) { write_serial(COM4_ADDR, (int)c); return 1; }
 
 struct LogTarget log_target_com1 = { .emitc = write_com1, .initialize = init_com1 };
-struct LogTarget log_target_com2 = { .emitc = write_com1, .initialize = init_com1 };
-struct LogTarget log_target_com3 = { .emitc = write_com1, .initialize = init_com1 };
-struct LogTarget log_target_com4 = { .emitc = write_com1, .initialize = init_com1 };
+struct LogTarget log_target_com2 = { .emitc = write_com2, .initialize = init_com2 };
+struct LogTarget log_target_com3 = { .emitc = write_com3, .initialize = init_com3 };
+struct LogTarget log_target_com4 = { .emitc = write_com4, .initialize = init_com4 };
